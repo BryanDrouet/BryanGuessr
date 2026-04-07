@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const countDisplay = document.getElementById('count');
     const copyBtn = document.getElementById('copy-btn');
     const clearBtn = document.getElementById('clear-btn');
+    const convertBtn = document.getElementById('convert-btn');
     const notification = document.getElementById('notification');
 
     function updateUI(data) {
@@ -11,7 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const isScanning = data.isScanning || false;
         
         toggle.checked = isScanning;
-        panoListTextarea.value = list.join('\n');
+        
+        const formattedArray = list.map(p => {
+            if (typeof p === 'object' && p.lat) {
+                return `            { pano: 'img/puydufou/${p.id}.jpg', lat: ${p.lat}, lng: ${p.lng} }`;
+            }
+            return p;
+        });
+        
+        panoListTextarea.value = formattedArray.join(',\n');
         countDisplay.textContent = list.length;
     }
 
@@ -44,5 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
         notification.textContent = 'LISTE VIDEE';
         notification.style.color = '#ff453a';
         setTimeout(() => notification.textContent = '', 2000);
+    });
+
+    convertBtn.addEventListener('click', () => {
+        chrome.tabs.create({ url: chrome.runtime.getURL('convertisseur.html') });
     });
 });
