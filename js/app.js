@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+const initBryanGuessr = () => {
     const app = document.getElementById('app');
     const rgpdBanner = document.getElementById('rgpd-banner');
     const btnAcceptRgpd = document.getElementById('btn-accept-rgpd');
@@ -12,6 +12,37 @@ document.addEventListener('DOMContentLoaded', () => {
         rgpdBanner.classList.add('hidden');
     });
 
+    const showNotification = (message, type = 'error') => {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.setAttribute('aria-live', 'assertive');
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let iconName = 'info';
+        if (type === 'error') iconName = 'alert-triangle';
+        if (type === 'success') iconName = 'check-circle';
+        if (type === 'warning') iconName = 'alert-circle';
+
+        toast.innerHTML = `<i data-lucide="${iconName}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        lucide.createIcons();
+
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+
+    window.addEventListener('error', (e) => {
+        showNotification(`Erreur système : ${e.message}`, 'error');
+    });
+
     const renderHome = () => {
         app.innerHTML = '';
 
@@ -22,11 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.className = 'park-grid';
 
         const parks = [
-            { id: 'puydufou', name: 'Puy du Fou', lat: 46.892, lng: -0.930, zoom: 15, defaultPano: 'assets/panoramas/puydufou_1.webp' },
-            { id: 'asterix', name: 'Parc Astérix', lat: 49.134, lng: 2.571, zoom: 15, defaultPano: 'assets/panoramas/asterix_1.webp' },
-            { id: 'disneyland', name: 'Disneyland Paris', lat: 48.872, lng: 2.775, zoom: 14, defaultPano: 'assets/panoramas/disneyland_1.webp' },
-            { id: 'futuroscope', name: 'Futuroscope', lat: 46.669, lng: 0.366, zoom: 15, defaultPano: 'assets/panoramas/futuroscope_1.webp' },
-            { id: 'ogliss', name: 'O\'Gliss Parc', lat: 46.425, lng: -1.488, zoom: 16, defaultPano: 'assets/panoramas/ogliss_1.webp' }
+            { id: 'puydufou', name: 'Puy du Fou', lat: 46.892, lng: -0.930, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+            { id: 'asterix', name: 'Parc Astérix', lat: 49.134, lng: 2.571, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+            { id: 'disneyland', name: 'Disneyland Paris', lat: 48.872, lng: 2.775, zoom: 14, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+            { id: 'futuroscope', name: 'Futuroscope', lat: 46.669, lng: 0.366, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+            { id: 'ogliss', name: 'O\'Gliss Parc', lat: 46.425, lng: -1.488, zoom: 16, defaultPano: 'https://pannellum.org/images/alma.jpg' }
         ];
 
         parks.forEach(park => {
@@ -221,20 +252,27 @@ document.addEventListener('DOMContentLoaded', () => {
         app.appendChild(main);
         
         lucide.createIcons();
-        initMapAndPanorama(park, options);
+        initMapAndPanorama(park, options, showNotification);
     };
 
-    const initMapAndPanorama = (park, options) => {
-        pannellum.viewer('panorama-container', {
-            type: 'equirectangular',
-            panorama: park.defaultPano,
-            autoLoad: true,
-            compass: false,
-            showControls: false,
-            draggable: options.allowPan,
-            mouseZoom: options.allowPan,
-            keyboardZoom: options.allowPan
-        });
+    const initMapAndPanorama = (park, options, notify) => {
+        try {
+            pannellum.viewer('panorama-container', {
+                type: 'equirectangular',
+                panorama: park.defaultPano,
+                autoLoad: true,
+                compass: false,
+                showControls: false,
+                draggable: options.allowPan,
+                mouseZoom: options.allowPan,
+                keyboardZoom: options.allowPan,
+                onLoad: () => {
+                    notify('Panorama chargé avec succès.', 'success');
+                }
+            });
+        } catch (error) {
+            notify('Erreur lors du chargement de l\'image 360°.', 'error');
+        }
 
         const map = L.map('map-container').setView([park.lat, park.lng], park.zoom);
         
@@ -269,16 +307,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         document.getElementById('btn-guess').addEventListener('click', () => {
+            if (!currentMarker) {
+                notify('Veuillez placer un marqueur sur la carte avant de valider.', 'error');
+                return;
+            }
+
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
-            if (currentMarker) {
-                const btn = document.getElementById('btn-guess');
-                btn.innerHTML = '<i data-lucide="check"></i> Position enregistrée';
-                lucide.createIcons();
-            }
+            
+            const btn = document.getElementById('btn-guess');
+            btn.innerHTML = '<i data-lucide="check"></i> Position enregistrée';
+            lucide.createIcons();
+            
+            notify('Position enregistrée avec succès !', 'success');
         });
     };
 
     renderHome();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBryanGuessr);
+} else {
+    initBryanGuessr();
+}
