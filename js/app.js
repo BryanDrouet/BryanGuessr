@@ -271,20 +271,28 @@ const initBryanGuessr = () => {
     };
 
     const initMapAndPanorama = (park, options, endTime, notify) => {
-        try {
-            pannellum.viewer('panorama-container', {
-                type: 'equirectangular',
-                panorama: park.defaultPano,
-                autoLoad: true,
-                compass: false,
-                showControls: false,
-                draggable: options.allowPan,
-                mouseZoom: options.allowPan,
-                keyboardZoom: options.allowPan
-            });
-        } catch (error) {
-            notify('Erreur lors du chargement de l\'image 360°.', 'error');
-        }
+        const panoContainer = document.getElementById('panorama-container');
+        panoContainer.innerHTML = '';
+
+        const scene = document.createElement('a-scene');
+        scene.setAttribute('embedded', '');
+        scene.setAttribute('vr-mode-ui', 'enabled: false');
+        scene.setAttribute('loading-screen', 'enabled: false');
+
+        const sky = document.createElement('a-sky');
+        sky.setAttribute('src', park.defaultPano);
+        
+        sky.addEventListener('materialtextureloaded', () => {
+            notify('Panorama chargé avec succès.', 'success');
+        });
+
+        const camera = document.createElement('a-camera');
+        camera.setAttribute('look-controls', `enabled: ${options.allowPan}; reverseMouseDrag: true`);
+        camera.setAttribute('wasd-controls', 'enabled: false');
+
+        scene.appendChild(sky);
+        scene.appendChild(camera);
+        panoContainer.appendChild(scene);
 
         const map = L.map('map-container').setView([park.lat, park.lng], park.zoom);
         
@@ -406,18 +414,26 @@ const initBryanGuessr = () => {
                 renderOptions(park);
             });
 
-            endScreen.appendChild(endTitle);
-            endScreen.appendChild(endStats);
-            endScreen.appendChild(btnSame);
-            endScreen.appendChild(btnDiff);
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'end-content-wrapper';
+            contentWrapper.appendChild(endTitle);
+            contentWrapper.appendChild(endStats);
+            contentWrapper.appendChild(btnSame);
+            contentWrapper.appendChild(btnDiff);
+
+            endScreen.appendChild(contentWrapper);
+
+            document.getElementById('btn-toggle-map').style.display = 'none';
+            document.getElementById('map-interface').style.display = 'none';
+
+            const mapContainer = document.getElementById('map-container');
+            endScreen.appendChild(mapContainer);
 
             document.querySelector('.game-main').appendChild(endScreen);
 
-            const mapInterface = document.getElementById('map-interface');
-            const toggleMapBtn = document.getElementById('btn-toggle-map');
-            if (mapInterface.classList.contains('hidden')) {
-                toggleMapBtn.click();
-            }
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
 
             lucide.createIcons();
         };
