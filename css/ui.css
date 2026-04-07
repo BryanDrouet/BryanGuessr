@@ -75,11 +75,10 @@ header {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    padding: 20px;
+    padding: 10px 0;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    overflow-y: auto;
 }
 
 .park-btn {
@@ -107,6 +106,7 @@ header {
 
 .options-form {
     max-width: 600px;
+    width: 100%;
     margin: 0 auto;
     padding: 20px;
     background: var(--bg-panel);

@@ -5,7 +5,7 @@ function renderHome() {
     app.appendChild(createGlobalHeader('BryanGuessr'));
 
     const main = document.createElement('main');
-    main.className = 'game-main page-transition';
+    main.className = 'game-main page-transition layout-margin';
     main.style.display = 'flex';
     main.style.flexDirection = 'column';
 
@@ -39,7 +39,7 @@ function renderOptions(park) {
     app.appendChild(createGlobalHeader('', renderHome));
 
     const main = document.createElement('main');
-    main.className = 'game-main page-transition';
+    main.className = 'game-main page-transition layout-margin';
     main.style.display = 'flex';
     main.style.flexDirection = 'column';
     main.style.justifyContent = 'center';

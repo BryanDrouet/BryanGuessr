@@ -319,6 +319,11 @@
         border-radius: 12px;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
+        opacity: 0.65;
+    }
+
+    #map-interface:hover, #map-interface:focus-within, #map-interface.expanded {
+        opacity: 1;
     }
 }
 
