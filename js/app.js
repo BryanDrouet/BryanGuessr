@@ -1,4 +1,18 @@
 const initBryanGuessr = () => {
+    const isDebug = new URLSearchParams(window.location.search).get('debug') === 'true';
+
+    const applyTheme = (theme) => {
+        if (theme === 'system') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        localStorage.setItem('bryanGuessrTheme', theme);
+    };
+
+    const currentTheme = localStorage.getItem('bryanGuessrTheme') || 'system';
+    applyTheme(currentTheme);
+
     const app = document.getElementById('app');
     const rgpdBanner = document.getElementById('rgpd-banner');
     const btnAcceptRgpd = document.getElementById('btn-accept-rgpd');
@@ -48,13 +62,68 @@ const initBryanGuessr = () => {
     };
 
     window.addEventListener('error', (e) => {
-        showNotification(`Erreur système : ${e.message}`, 'error');
+        if (isDebug) {
+            showNotification(`Erreur système : ${e.message}`, 'error');
+        }
     });
+
+    const createGlobalHeader = (titleText, backAction = null) => {
+        const header = document.createElement('header');
+        
+        if (backAction) {
+            const btnBack = document.createElement('button');
+            btnBack.className = 'btn-back';
+            btnBack.setAttribute('aria-label', 'Retour');
+            btnBack.innerHTML = `<i data-lucide="arrow-left"></i> Retour`;
+            btnBack.addEventListener('click', backAction);
+            header.appendChild(btnBack);
+        } else {
+            const title = document.createElement('div');
+            title.textContent = titleText;
+            title.style.fontWeight = 'bold';
+            header.appendChild(title);
+        }
+
+        const selectTheme = document.createElement('select');
+        selectTheme.className = 'theme-selector';
+        selectTheme.setAttribute('aria-label', 'Sélectionner le thème');
+        
+        const themes = [
+            { val: 'system', text: 'Système' },
+            { val: 'light', text: 'Clair' },
+            { val: 'dark', text: 'Sombre' }
+        ];
+
+        const savedTheme = localStorage.getItem('bryanGuessrTheme') || 'system';
+
+        themes.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.val;
+            opt.textContent = t.text;
+            if (t.val === savedTheme) opt.selected = true;
+            selectTheme.appendChild(opt);
+        });
+
+        selectTheme.addEventListener('change', (e) => {
+            applyTheme(e.target.value);
+        });
+
+        header.appendChild(selectTheme);
+        return header;
+    };
 
     const renderHome = () => {
         app.innerHTML = '';
 
+        app.appendChild(createGlobalHeader('BryanGuessr'));
+
+        const main = document.createElement('main');
+        main.className = 'game-main';
+        main.style.display = 'flex';
+        main.style.flexDirection = 'column';
+
         const title = document.createElement('h1');
+        title.className = 'main-title';
         title.textContent = 'Sélectionnez votre parc';
 
         const grid = document.createElement('div');
@@ -69,21 +138,17 @@ const initBryanGuessr = () => {
             grid.appendChild(btn);
         });
 
-        app.appendChild(title);
-        app.appendChild(grid);
+        main.appendChild(title);
+        main.appendChild(grid);
+        app.appendChild(main);
+
         lucide.createIcons();
     };
 
     const renderOptions = (park) => {
         app.innerHTML = '';
 
-        const header = document.createElement('header');
-        const btnBack = document.createElement('button');
-        btnBack.className = 'btn-back';
-        btnBack.setAttribute('aria-label', 'Retour à la sélection des parcs');
-        btnBack.innerHTML = `<i data-lucide="arrow-left"></i> Retour`;
-        btnBack.addEventListener('click', renderHome);
-        header.appendChild(btnBack);
+        app.appendChild(createGlobalHeader('', renderHome));
 
         const main = document.createElement('main');
         main.className = 'game-main';
@@ -92,9 +157,8 @@ const initBryanGuessr = () => {
         main.style.justifyContent = 'center';
 
         const title = document.createElement('h2');
+        title.className = 'main-title';
         title.textContent = `Configuration - ${park.name}`;
-        title.style.textAlign = 'center';
-        title.style.marginBottom = '30px';
 
         const form = document.createElement('form');
         form.className = 'options-form';
@@ -120,39 +184,39 @@ const initBryanGuessr = () => {
 
         const groupMove = document.createElement('div');
         groupMove.className = 'form-group form-group-checkbox';
+        const labelMove = document.createElement('label');
+        labelMove.setAttribute('for', 'allow-move');
+        labelMove.textContent = 'Possibilité de se déplacer';
         const inputMove = document.createElement('input');
         inputMove.type = 'checkbox';
         inputMove.id = 'allow-move';
         inputMove.name = 'allow_move';
         inputMove.setAttribute('aria-describedby', 'move-desc');
-        const labelMove = document.createElement('label');
-        labelMove.setAttribute('for', 'allow-move');
-        labelMove.textContent = 'Possibilité de se déplacer';
         const descMove = document.createElement('span');
         descMove.id = 'move-desc';
         descMove.className = 'sr-only';
         descMove.textContent = 'Autorise le déplacement entre différents panoramas.';
-        groupMove.appendChild(inputMove);
         groupMove.appendChild(labelMove);
+        groupMove.appendChild(inputMove);
         groupMove.appendChild(descMove);
 
         const groupPan = document.createElement('div');
         groupPan.className = 'form-group form-group-checkbox';
+        const labelPan = document.createElement('label');
+        labelPan.setAttribute('for', 'allow-pan');
+        labelPan.textContent = 'Possibilité de bouger la caméra';
         const inputPan = document.createElement('input');
         inputPan.type = 'checkbox';
         inputPan.id = 'allow-pan';
         inputPan.name = 'allow_pan';
         inputPan.checked = true;
         inputPan.setAttribute('aria-describedby', 'pan-desc');
-        const labelPan = document.createElement('label');
-        labelPan.setAttribute('for', 'allow-pan');
-        labelPan.textContent = 'Possibilité de bouger la caméra';
         const descPan = document.createElement('span');
         descPan.id = 'pan-desc';
         descPan.className = 'sr-only';
         descPan.textContent = 'Autorise la rotation de la vue à 360 degrés.';
-        groupPan.appendChild(inputPan);
         groupPan.appendChild(labelPan);
+        groupPan.appendChild(inputPan);
         groupPan.appendChild(descPan);
 
         const btnSubmit = document.createElement('button');
@@ -190,9 +254,8 @@ const initBryanGuessr = () => {
 
         main.appendChild(title);
         main.appendChild(form);
-
-        app.appendChild(header);
         app.appendChild(main);
+
         lucide.createIcons();
     };
 
@@ -283,7 +346,9 @@ const initBryanGuessr = () => {
         sky.setAttribute('src', park.defaultPano);
         
         sky.addEventListener('materialtextureloaded', () => {
-            notify('Panorama chargé avec succès.', 'success');
+            if (isDebug) {
+                notify('Panorama chargé avec succès.', 'success');
+            }
         });
 
         const camera = document.createElement('a-camera');
@@ -362,14 +427,6 @@ const initBryanGuessr = () => {
             }
 
             localStorage.removeItem('bryanGuessrGameState');
-
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-            newBtn.innerHTML = '<i data-lucide="home"></i> Menu principal';
-            
-            newBtn.addEventListener('click', () => {
-                renderHome();
-            });
 
             document.getElementById('panorama-container').style.display = 'none';
 
