@@ -326,7 +326,7 @@ function renderGame(park, gameState) {
     btnGuess.setAttribute('aria-label', 'Valider ma position géographique');
     btnGuess.innerHTML = `<i data-lucide="map-pin"></i> Valider`;
 
-    btnResizeMap.addEventListener('click', () => {
+    mapHeader.addEventListener('click', () => {
         const isExpanded = mapInterface.classList.toggle('expanded');
         btnResizeMap.innerHTML = isExpanded ? '<i data-lucide="minimize"></i>' : '<i data-lucide="maximize"></i>';
         btnResizeMap.setAttribute('aria-label', isExpanded ? 'Rétrécir la carte' : 'Agrandir la carte');
