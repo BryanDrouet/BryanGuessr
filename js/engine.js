@@ -43,71 +43,96 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
         maxBoundsViscosity: 1.0
     });
 
-    // Avec CRS.Simple, les limites doivent être en pixels, pas en lat/lng
-    // Supposons que l'image fait environ 1024x680
-    const imageDimensions = {
-        width: 1024,
-        height: 680
-    };
+    // Charger l'image pour obtenir ses dimensions réelles
+    const img = new Image();
+    img.onload = () => {
+        const imageDimensions = {
+            width: img.width,
+            height: img.height
+        };
 
-    const imageBounds = [
-        [0, 0],
-        [imageDimensions.height, imageDimensions.width]
-    ];
+        const imageBounds = [
+            [0, 0],
+            [imageDimensions.height, imageDimensions.width]
+        ];
 
-    // Définir les limites maximales pour empêcher le pan en dehors de l'image
-    imageMap.setMaxBounds(imageBounds);
+        // Définir les limites maximales pour empêcher le pan en dehors de l'image
+        imageMap.setMaxBounds(imageBounds);
 
-    // Ajouter l'image comme ImageOverlay
-    L.imageOverlay(currentLocation.pano, imageBounds, {
-        className: 'pano-image-overlay'
-    }).addTo(imageMap);
+        // Ajouter l'image comme ImageOverlay
+        L.imageOverlay(currentLocation.pano, imageBounds, {
+            className: 'pano-image-overlay'
+        }).addTo(imageMap);
 
-    // Centrer et ajuster le zoom pour voir toute l'image sans distorsion
-    // Utiliser fitBounds pour remplir l'écran au minimum nécessaire
-    imageMap.fitBounds(imageBounds, {
-        padding: [0, 0]
-    });
+        // Calculer le zoom pour que l'image remplisse complètement le conteneur
+        // sans laisser de noir sur les bords
+        imageMap.fitBounds(imageBounds);
+        
+        // Après fitBounds, ajuster le zoom pour remplir tout l'espace
+        setTimeout(() => {
+            const containerSize = imageMap.getSize();
+            
+            // Zoom nécessaire pour remplir la largeur
+            const zoomForWidth = Math.log2(containerSize.x / imageDimensions.width);
+            // Zoom nécessaire pour remplir la hauteur
+            const zoomForHeight = Math.log2(containerSize.y / imageDimensions.height);
+            
+            // Prendre le zoom maximum pour remplir tout (accepter le dépassement en pan)
+            const optimalZoom = Math.max(zoomForWidth, zoomForHeight);
+            
+            // Appliquer le zoom
+            imageMap.setZoom(optimalZoom);
+        }, 100);
 
-    // Ajouter les hotspots de navigation si allowMove
-    if (gameState.options.allowMove) {
-        park.locations.forEach(loc => {
-            if (loc.pano !== currentLocation.pano) {
-                const dist = Math.sqrt(Math.pow(loc.lat - currentLocation.lat, 2) + Math.pow(loc.lng - currentLocation.lng, 2));
-                if (dist < 0.0008) {
-                    // Créer un marqueur circulaire au centre de l'image
-                    const marker = L.circleMarker([imageDimensions.height / 2, imageDimensions.width / 2], {
-                        radius: 30,
-                        fillColor: 'rgba(52, 199, 89, 0.4)',
-                        color: 'rgba(52, 199, 89, 0.9)',
-                        weight: 3,
-                        opacity: 0.9,
-                        fillOpacity: 0.4
-                    }).addTo(imageMap);
+        // Ajouter les hotspots de navigation si allowMove
+        if (gameState.options.allowMove) {
+            park.locations.forEach(loc => {
+                if (loc.pano !== currentLocation.pano) {
+                    const dist = Math.sqrt(Math.pow(loc.lat - currentLocation.lat, 2) + Math.pow(loc.lng - currentLocation.lng, 2));
+                    if (dist < 0.0008) {
+                        // Créer un marqueur circulaire au centre de l'image
+                        const marker = L.circleMarker([imageDimensions.height / 2, imageDimensions.width / 2], {
+                            radius: 30,
+                            fillColor: 'rgba(52, 199, 89, 0.4)',
+                            color: 'rgba(52, 199, 89, 0.9)',
+                            weight: 3,
+                            opacity: 0.9,
+                            fillOpacity: 0.4
+                        }).addTo(imageMap);
 
-                    marker.on('click', () => {
-                        initMapAndPanorama(park, gameState, loc, notify);
-                    });
+                        marker.on('click', () => {
+                            initMapAndPanorama(park, gameState, loc, notify);
+                        });
 
-                    // Label au centre
-                    const label = L.divIcon({
-                        html: '<div style="color: white; font-weight: bold; font-size: 16px; text-align: center;">→</div>',
-                        iconSize: [30, 30],
-                        className: 'hotspot-label'
-                    });
+                        // Label au centre
+                        const label = L.divIcon({
+                            html: '<div style="color: white; font-weight: bold; font-size: 16px; text-align: center;">→</div>',
+                            iconSize: [30, 30],
+                            className: 'hotspot-label'
+                        });
 
-                    L.marker([imageDimensions.height / 2, imageDimensions.width / 2], {
-                        icon: label,
-                        interactive: false
-                    }).addTo(imageMap);
+                        L.marker([imageDimensions.height / 2, imageDimensions.width / 2], {
+                            icon: label,
+                            interactive: false
+                        }).addTo(imageMap);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    if (typeof isDebug !== 'undefined' && isDebug) {
-        notify('Image chargée avec succès.', 'success');
+        if (typeof isDebug !== 'undefined' && isDebug) {
+            notify('Image chargée avec succès.', 'success');
+        }
     };
+
+    img.onerror = () => {
+        if (typeof isDebug !== 'undefined' && isDebug) {
+            notify('Erreur lors du chargement de l\'image.', 'error');
+        }
+    };
+
+    // Charger l'image
+    img.src = currentLocation.pano;
 
     const baseMaps = {
         "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap', crossOrigin: true, className: 'map-tile-layer' }),
