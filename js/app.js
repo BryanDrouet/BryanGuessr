@@ -19,9 +19,20 @@ function renderHome() {
     parks.forEach(park => {
         const btn = document.createElement('button');
         btn.className = 'park-btn';
-        btn.setAttribute('aria-label', `Configurer la partie : ${park.name}`);
-        btn.innerHTML = `<i data-lucide="map"></i> ${park.name}`;
-        btn.addEventListener('click', () => renderOptions(park));
+        
+        // Vérification si le parc est prêt (plus de 1 point réel)
+        const isReady = park.id === 'puydufou' && park.locations.length > 0;
+
+        if (!isReady) {
+            btn.classList.add('park-btn-disabled');
+            btn.setAttribute('aria-disabled', 'true');
+            btn.innerHTML = `<i data-lucide="lock"></i> ${park.name} <span class="coming-soon-badge">À venir</span>`;
+        } else {
+            btn.setAttribute('aria-label', `Configurer la partie : ${park.name}`);
+            btn.innerHTML = `<i data-lucide="map"></i> ${park.name}`;
+            btn.addEventListener('click', () => renderOptions(park));
+        }
+        
         grid.appendChild(btn);
     });
 
@@ -437,8 +448,4 @@ function bootstrapBryanGuessr() {
     }
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootstrapBryanGuessr);
-} else {
-    bootstrapBryanGuessr();
-}
+bootstrapBryanGuessr();

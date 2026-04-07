@@ -8,9 +8,7 @@ const parks = [
         centerLng: -0.930, 
         zoom: 15, 
         locations: [
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.8925, lng: -0.9305 },
-            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 46.8910, lng: -0.9290 },
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.8930, lng: -0.9315 }
+            { pano: 'img/puydufou/CIHM0ogKEICAgIDOqNnwrgE.jpg', lat: 46.8934002, lng: -0.9323215 }
         ]
     },
     { 
@@ -20,9 +18,7 @@ const parks = [
         centerLng: 2.571, 
         zoom: 15, 
         locations: [
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 49.1345, lng: 2.5715 },
-            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 49.1330, lng: 2.5700 },
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 49.1350, lng: 2.5720 }
+            { pano: 'img/asterix/REMPLACER_PAR_ID.jpg', lat: 49.134, lng: 2.571 }
         ]
     },
     { 
@@ -32,9 +28,7 @@ const parks = [
         centerLng: 2.775, 
         zoom: 14, 
         locations: [
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 48.8725, lng: 2.7755 },
-            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 48.8710, lng: 2.7740 },
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 48.8730, lng: 2.7760 }
+            { pano: 'img/disneyland/REMPLACER_PAR_ID.jpg', lat: 48.872, lng: 2.775 }
         ]
     },
     { 
@@ -44,21 +38,7 @@ const parks = [
         centerLng: 0.366, 
         zoom: 15, 
         locations: [
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.6695, lng: 0.3665 },
-            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 46.6680, lng: 0.3650 },
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.6700, lng: 0.3670 }
-        ]
-    },
-    { 
-        id: 'ogliss', 
-        name: 'O\'Gliss Parc', 
-        centerLat: 46.425, 
-        centerLng: -1.488, 
-        zoom: 16, 
-        locations: [
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.4255, lng: -1.4885 },
-            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 46.4240, lng: -1.4870 },
-            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.4260, lng: -1.4890 }
+            { pano: 'img/futuroscope/REMPLACER_PAR_ID.jpg', lat: 46.669, lng: 0.366 }
         ]
     }
 ];

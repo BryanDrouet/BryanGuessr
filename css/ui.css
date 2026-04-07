@@ -289,6 +289,30 @@ header {
     border-left: 5px solid #ffc107;
 }
 
+.park-btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    position: relative;
+    pointer-events: none; /* Désactive complètement le clic */
+}
+
+.park-btn-disabled:hover {
+    transform: none !important;
+}
+
+.coming-soon-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ffc107;
+    color: #000;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
 @keyframes slideIn {
     to { transform: translateX(0); }
 }
