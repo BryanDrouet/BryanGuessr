@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const countDisplay = document.getElementById('count');
     const copyBtn = document.getElementById('copy-btn');
     const clearBtn = document.getElementById('clear-btn');
-    const convertBtn = document.getElementById('convert-btn');
     const notification = document.getElementById('notification');
 
     function updateUI(data) {
@@ -17,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof p === 'object' && p.lat) {
                 return `            { pano: 'img/puydufou/${p.id}.jpg', lat: ${p.lat}, lng: ${p.lng} }`;
             }
-            return p;
+            return `            FORMAT INVALIDE IGNORE : ${p}`;
         });
         
         panoListTextarea.value = formattedArray.join(',\n');
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = panoListTextarea.value;
         if (!text) return;
         try {
-            await navigator.clipboard.writeText(text);
+            await navigator.clipboard.writeText(text + ",\n");
             notification.textContent = 'LISTE COPIEE AVEC SUCCES';
             notification.style.color = '#32d74b';
             setTimeout(() => notification.textContent = '', 2000);
@@ -49,13 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     clearBtn.addEventListener('click', () => {
-        chrome.storage.local.set({ panoList: [] });
-        notification.textContent = 'LISTE VIDEE';
-        notification.style.color = '#ff453a';
-        setTimeout(() => notification.textContent = '', 2000);
-    });
-
-    convertBtn.addEventListener('click', () => {
-        chrome.tabs.create({ url: chrome.runtime.getURL('convertisseur.html') });
+        if(confirm("Veux-tu vraiment vider toute ta liste ?")) {
+            chrome.storage.local.set({ panoList: [] });
+            notification.textContent = 'LISTE VIDEE';
+            notification.style.color = '#ff453a';
+            setTimeout(() => notification.textContent = '', 2000);
+        }
     });
 });

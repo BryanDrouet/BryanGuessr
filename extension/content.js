@@ -13,7 +13,7 @@ hud.style.fontWeight = 'bold';
 hud.style.boxShadow = '0 4px 15px rgba(0,0,0,0.4)';
 hud.style.display = 'none';
 hud.style.pointerEvents = 'none';
-hud.style.transition = 'background-color 0.2s ease, color 0.2s ease';
+
 document.body.appendChild(hud);
 
 let lastPanoId = '';
@@ -27,30 +27,37 @@ setInterval(() => {
 
         hud.style.display = 'block';
         const url = window.location.href;
-        const match = url.match(/!1s([^!&?]+)/);
+        
+        const matchId = url.match(/!1s([^!&?]+)/);
+        const matchCoords = url.match(/@([0-9.-]+),([0-9.-]+)/);
 
-        if (match && match[1]) {
-            const currentPanoId = match[1];
+        if (matchId && matchId[1] && matchCoords && matchCoords[1] && matchCoords[2]) {
+            const currentPanoId = matchId[1];
+            const currentLat = parseFloat(matchCoords[1]);
+            const currentLng = parseFloat(matchCoords[2]);
+            
             const list = data.panoList || [];
+            
+            const isDuplicate = list.some(item => typeof item === 'object' && item.id === currentPanoId);
 
-            if (list.includes(currentPanoId)) {
+            if (isDuplicate) {
                 hud.style.backgroundColor = '#ffc107';
                 hud.style.color = '#000000';
-                hud.textContent = 'DEJA ENREGISTRE';
+                hud.textContent = '[ DEJA ENREGISTRE ]';
             } else {
                 if (currentPanoId !== lastPanoId) {
                     lastPanoId = currentPanoId;
-                    list.push(currentPanoId);
+                    list.push({ id: currentPanoId, lat: currentLat, lng: currentLng });
                     chrome.storage.local.set({ panoList: list });
                 }
                 hud.style.backgroundColor = '#34c759';
                 hud.style.color = '#ffffff';
-                hud.textContent = 'NOUVEAU POINT CAPTURE';
+                hud.textContent = '[ NOUVEAU POINT CAPTURE ]';
             }
         } else {
             hud.style.backgroundColor = '#ff3b30';
             hud.style.color = '#ffffff';
-            hud.textContent = 'MODE STREET VIEW REQUIS';
+            hud.textContent = '[ MODE STREET VIEW REQUIS ]';
         }
     });
 }, 500);
