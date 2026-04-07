@@ -246,14 +246,45 @@ header {
     background: var(--btn-hover);
 }
 
+.theme-selector-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
 .theme-selector {
-    padding: 5px;
-    border-radius: 6px;
-    background: var(--bg-panel);
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 8px 36px 8px 16px;
+    border-radius: 8px;
+    background-color: var(--bg-panel);
     color: var(--text-main);
     border: 1px solid var(--border-color);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
     outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.theme-selector:hover, .theme-selector:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.theme-selector-icon {
+    position: absolute;
+    right: 10px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.theme-selector-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 #panorama-container {
@@ -481,6 +512,16 @@ header {
 
 @keyframes fadeOut {
     to { opacity: 0; visibility: hidden; transform: translateX(120%); }
+}
+
+footer {
+    background: var(--header-bg);
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    z-index: 10;
+    border-top: 1px solid var(--border-color);
 }
 
 @media (min-width: 768px) {

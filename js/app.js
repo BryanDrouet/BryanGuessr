@@ -84,9 +84,18 @@ const initBryanGuessr = () => {
             header.appendChild(title);
         }
 
+        const themeContainer = document.createElement('div');
+        themeContainer.className = 'theme-selector-container';
+
+        const themeLabel = document.createElement('label');
+        themeLabel.setAttribute('for', 'theme-selector');
+        themeLabel.className = 'sr-only';
+        themeLabel.textContent = 'Thème';
+
         const selectTheme = document.createElement('select');
+        selectTheme.id = 'theme-selector';
+        selectTheme.name = 'theme_selector';
         selectTheme.className = 'theme-selector';
-        selectTheme.setAttribute('aria-label', 'Sélectionner le thème');
         
         const themes = [
             { val: 'system', text: 'Système' },
@@ -108,7 +117,15 @@ const initBryanGuessr = () => {
             applyTheme(e.target.value);
         });
 
-        header.appendChild(selectTheme);
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'theme-selector-icon';
+        iconContainer.innerHTML = '<i data-lucide="chevron-down"></i>';
+
+        themeContainer.appendChild(themeLabel);
+        themeContainer.appendChild(selectTheme);
+        themeContainer.appendChild(iconContainer);
+        
+        header.appendChild(themeContainer);
         return header;
     };
 
