@@ -60,9 +60,96 @@ h1 {
     outline: 2px solid #007bff;
 }
 
+.options-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.options-form {
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.options-form label {
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.options-form select, .options-form input[type="checkbox"] {
+    padding: 12px;
+    font-size: 1rem;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.options-form input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+}
+
+.btn-start {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 18px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    transition: background 0.2s;
+}
+
+.btn-start:hover {
+    background: #0056b3;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
 .game-main {
     flex: 1;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -88,7 +175,7 @@ header {
 
 #panorama-container {
     width: 100%;
-    height: 100%;
+    flex: 1;
     background: #222;
 }
 
@@ -127,6 +214,12 @@ header {
     align-items: center;
     justify-content: center;
     gap: 10px;
+    transition: background 0.2s;
+}
+
+#btn-guess:disabled {
+    background: #555;
+    cursor: not-allowed;
 }
 
 #btn-toggle-map {
@@ -147,6 +240,42 @@ header {
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
+#result-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.result-card {
+    background: #1a1a1a;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+}
+
+.result-score {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #28a745;
+    margin: 20px 0;
+}
+
+.result-distance {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
 #rgpd-banner {
     position: fixed;
     bottom: 0;
@@ -155,7 +284,7 @@ header {
     background: #222;
     color: #fff;
     padding: 20px;
-    z-index: 100;
+    z-index: 1000;
     text-align: center;
 }
 
@@ -164,28 +293,29 @@ header {
 }
 
 #btn-accept-rgpd {
-    margin-top: 10px;
+    margin-top: 15px;
     padding: 10px 20px;
     background: #007bff;
     color: #fff;
     border: none;
     cursor: pointer;
     border-radius: 4px;
+    font-size: 1rem;
 }
 
 footer {
     background: #111;
     color: #555;
     text-align: center;
-    padding: 0.5rem;
+    padding: 0.8rem;
     font-size: 0.8rem;
     z-index: 10;
 }
 
 @media (min-width: 768px) {
     #map-interface {
-        width: 400px;
-        height: 350px;
+        width: 450px;
+        height: 400px;
         bottom: 20px;
         right: 20px;
         border-radius: 8px;
@@ -198,6 +328,6 @@ footer {
     }
 
     #btn-toggle-map {
-        bottom: 390px;
+        bottom: 440px;
     }
 }
