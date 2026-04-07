@@ -3,8 +3,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Panneau de contrôle pour l'extraction de coordonnées Google Maps">
-    <base href=".">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -12,18 +10,19 @@
     <div class="toggle-container">
         <label for="scan-toggle" class="toggle-label">Scan Automatique</label>
         <div class="switch">
-            <input type="checkbox" id="scan-toggle" name="scan_toggle" aria-label="Activer ou désactiver le scan automatique des panoramas">
-            <span class="slider" aria-hidden="true"></span>
+            <input type="checkbox" id="scan-toggle" name="scan_toggle">
+            <span class="slider"></span>
         </div>
     </div>
     <div class="stats">Points enregistrés : <strong id="count">0</strong></div>
-    <label for="pano-list" aria-hidden="true" class="sr-only"></label>
-    <textarea id="pano-list" name="pano_list" readonly aria-label="Liste des données capturées"></textarea>
+    <textarea id="pano-list" readonly></textarea>
     <div class="btn-group">
-        <button id="copy-btn" name="action_copy" type="button">Copier tout</button>
-        <button id="clear-btn" name="action_clear" type="button">Vider</button>
+        <button id="copy-btn" type="button">Copier le JS</button>
+        <button id="download-zip-btn" type="button" style="background: #ff9f0a;">Télécharger ZIP</button>
+        <button id="clear-btn" type="button">Vider</button>
     </div>
-    <div id="notification" aria-live="polite"></div>
+    <div id="notification"></div>
+    <script src="jszip.min.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>

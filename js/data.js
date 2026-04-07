@@ -8,7 +8,18 @@ const parks = [
         centerLng: -0.930, 
         zoom: 15, 
         locations: [
-            { pano: 'img/puydufou/CIHM0ogKEICAgIDOqNnwrgE.jpg', lat: 46.8934002, lng: -0.9323215 }
+            { pano: 'img/puydufou/64qwt9meWlz0cBzfHKWd8A.jpg', lat: 46.8971878, lng: -0.9311836 },
+            { pano: 'img/puydufou/MqUGcDuUS-168N7KsDoprg.jpg', lat: 46.8972828, lng: -0.9311647 },
+            { pano: 'img/puydufou/iBIi5D-U2AzMA87u8ogxxA.jpg', lat: 46.8973587, lng: -0.9312139 },
+            { pano: 'img/puydufou/UaLX_vXavlWqfPS0SAxmQg.jpg', lat: 46.8971311, lng: -0.9312342 },
+            { pano: 'img/puydufou/cSQzlLYDLLMdkabQWgir5g.jpg', lat: 46.8971364, lng: -0.931371 },
+            { pano: 'img/puydufou/Aj6x5osXGhPeyq7t2PujKQ.jpg', lat: 46.8971529, lng: -0.9315065 },
+            { pano: 'img/puydufou/CRdlu0LnXMqy8pYFzXJ6_w.jpg', lat: 46.8971692, lng: -0.9316344 },
+            { pano: 'img/puydufou/3_XXFivhP6Ghx32gZrBS4w.jpg', lat: 46.8971881, lng: -0.931774 },
+            { pano: 'img/puydufou/0tJpDWeAIL5_hxEy-S8fhg.jpg', lat: 46.8972181, lng: -0.9320169 },
+            { pano: 'img/puydufou/y7FPZu1JiPMp8n-a5mac6g.jpg', lat: 46.89743, lng: -0.9318026 },
+            { pano: 'img/puydufou/HoULchjOeObaC7CpehIgrg.jpg', lat: 46.8974133, lng: -0.9316712 },
+            { pano: 'img/puydufou/AGq1Q4Vxax_33cXLvA0o9w.jpg', lat: 46.8973919, lng: -0.9315171 }
         ]
     },
     { 

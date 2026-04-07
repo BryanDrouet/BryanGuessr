@@ -1,15 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Bryan Pano Grabber (Live Edition)",
-  "version": "3.1",
-  "description": "Scanne et enregistre les ID et Coordonnees GPS en direct.",
+  "version": "4.2",
+  "description": "Scanne, enregistre et télécharge les panoramas en ZIP.",
   "permissions": [
     "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "downloads"
   ],
   "host_permissions": [
+    "*://*.google.fr/maps/*",
     "*://*.google.com/maps/*",
-    "*://*.google.fr/maps/*"
+    "*://*.googleusercontent.com/*",
+    "*://*.googleapis.com/*",
+    "*://*.ggpht.com/*"
   ],
   "action": {
     "default_popup": "popup.html"
@@ -17,8 +21,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.google.com/maps/*",
-        "*://*.google.fr/maps/*"
+        "*://www.google.fr/maps/*",
+        "*://www.google.com/maps/*"
       ],
       "js": [
         "content.js"

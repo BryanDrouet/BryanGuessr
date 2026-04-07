@@ -26,40 +26,104 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
     const panoContainer = document.getElementById('panorama-container');
     panoContainer.innerHTML = '';
 
-    try {
-        pannellum.viewer('panorama-container', {
-            type: 'equirectangular',
-            panorama: currentLocation.pano,
-            autoLoad: true,
-            compass: false,
-            showControls: false,
-            draggable: gameState.options.allowPan,
-            mouseZoom: gameState.options.allowPan,
-            keyboardZoom: gameState.options.allowPan,
-            onLoad: () => {
-                if (typeof isDebug !== 'undefined' && isDebug) {
-                    notify('Panorama chargé avec succès.', 'success');
+    // Créer une carte Leaflet pour la visualisation de l'image
+    const imageMap = L.map('panorama-container', {
+        maxZoom: 4,
+        minZoom: 0,
+        zoom: 1,
+        zoomControl: true,
+        attributionControl: false,
+        boxZoom: false,
+        doubleClickZoom: false,
+        scrollWheelZoom: true,
+        dragging: true,
+        touchZoom: true,
+        bounceAtZoomLimits: false,
+        crs: L.CRS.Simple,
+        maxBoundsViscosity: 1.0
+    });
+
+    // Avec CRS.Simple, les limites doivent être en pixels, pas en lat/lng
+    // Supposons que l'image fait environ 1024x680
+    const imageDimensions = {
+        width: 1024,
+        height: 680
+    };
+
+    const imageBounds = [
+        [0, 0],
+        [imageDimensions.height, imageDimensions.width]
+    ];
+
+    // Définir les limites maximales pour empêcher le pan en dehors de l'image
+    imageMap.setMaxBounds(imageBounds);
+
+    // Ajouter l'image comme ImageOverlay
+    L.imageOverlay(currentLocation.pano, imageBounds, {
+        className: 'pano-image-overlay'
+    }).addTo(imageMap);
+
+    // Centrer et ajuster le zoom pour voir toute l'image sans distorsion
+    // Utiliser fitBounds pour remplir l'écran au minimum nécessaire
+    imageMap.fitBounds(imageBounds, {
+        padding: [0, 0]
+    });
+
+    // Ajouter les hotspots de navigation si allowMove
+    if (gameState.options.allowMove) {
+        park.locations.forEach(loc => {
+            if (loc.pano !== currentLocation.pano) {
+                const dist = Math.sqrt(Math.pow(loc.lat - currentLocation.lat, 2) + Math.pow(loc.lng - currentLocation.lng, 2));
+                if (dist < 0.0008) {
+                    // Créer un marqueur circulaire au centre de l'image
+                    const marker = L.circleMarker([imageDimensions.height / 2, imageDimensions.width / 2], {
+                        radius: 30,
+                        fillColor: 'rgba(52, 199, 89, 0.4)',
+                        color: 'rgba(52, 199, 89, 0.9)',
+                        weight: 3,
+                        opacity: 0.9,
+                        fillOpacity: 0.4
+                    }).addTo(imageMap);
+
+                    marker.on('click', () => {
+                        initMapAndPanorama(park, gameState, loc, notify);
+                    });
+
+                    // Label au centre
+                    const label = L.divIcon({
+                        html: '<div style="color: white; font-weight: bold; font-size: 16px; text-align: center;">→</div>',
+                        iconSize: [30, 30],
+                        className: 'hotspot-label'
+                    });
+
+                    L.marker([imageDimensions.height / 2, imageDimensions.width / 2], {
+                        icon: label,
+                        interactive: false
+                    }).addTo(imageMap);
                 }
             }
         });
-    } catch (error) {
-        if (typeof isDebug !== 'undefined' && isDebug) {
-            notify('Erreur lors du chargement de l\'image 360°.', 'error');
-        }
     }
 
+    if (typeof isDebug !== 'undefined' && isDebug) {
+        notify('Image chargée avec succès.', 'success');
+    };
+
     const baseMaps = {
-        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
-        "CartoDB Clair": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CartoDB' }),
-        "CartoDB Sombre": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CartoDB' }),
-        "OpenTopoMap": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenTopoMap' })
+        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap', crossOrigin: true, className: 'map-tile-layer' }),
+        "CartoDB Clair": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CartoDB', crossOrigin: true, className: 'map-tile-layer' }),
+        "CartoDB Sombre": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CartoDB', crossOrigin: true, className: 'map-tile-layer' }),
+        "OpenTopoMap": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '&copy; OpenTopoMap', crossOrigin: true, className: 'map-tile-layer' })
     };
 
     const savedMapLayerName = localStorage.getItem('bryanGuessrMapLayer') || "OpenStreetMap";
     let defaultLayer = baseMaps[savedMapLayerName] || baseMaps["OpenStreetMap"];
 
     const map = L.map('map-container', {
-        layers: [defaultLayer]
+        layers: [defaultLayer],
+        zoomAnimation: false,
+        fadeAnimation: false,
+        zoomSnap: 1
     }).setView([park.centerLat, park.centerLng], park.zoom);
 
     L.control.layers(baseMaps).addTo(map);
@@ -177,7 +241,7 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
         if (!currentMarker && isTimeout) {
             endStats.innerHTML = `Aucun point marqué.`;
         } else {
-            endStats.innerHTML = `Distance : ${Math.round(distance)}m<br><span class="end-score">+${formattedRoundPoints} pts</span>`;
+            endStats.innerHTML = `Distance : ${Math.round(distance)}m<br><span class=\"end-score\">+${formattedRoundPoints} pts</span>`;
         }
 
         const contentWrapper = document.createElement('div');
@@ -191,7 +255,7 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
         if (isLastRound) {
             const btnSame = document.createElement('button');
             btnSame.className = 'btn-replay-same';
-            btnSame.innerHTML = `<i data-lucide="rotate-cw"></i> Rejouer (Mêmes réglages)`;
+            btnSame.innerHTML = `<i data-lucide=\"rotate-cw\"></i> Rejouer (Mêmes réglages)`;
             btnSame.addEventListener('click', () => {
                 const newGameState = {
                     ...gameState,
@@ -206,7 +270,7 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
 
             const btnDiff = document.createElement('button');
             btnDiff.className = 'btn-replay-diff';
-            btnDiff.innerHTML = `<i data-lucide="settings"></i> Modifier les réglages`;
+            btnDiff.innerHTML = `<i data-lucide=\"settings\"></i> Modifier les réglages`;
             btnDiff.addEventListener('click', () => {
                 renderOptions(park);
             });
@@ -216,7 +280,7 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
         } else {
             const btnNext = document.createElement('button');
             btnNext.className = 'btn-replay-same';
-            btnNext.innerHTML = `Manche suivante <i data-lucide="arrow-right"></i>`;
+            btnNext.innerHTML = `Manche suivante <i data-lucide=\"arrow-right\"></i>`;
             btnNext.addEventListener('click', () => {
                 gameState.currentRound++;
                 gameState.endTime = gameState.options.timeLimit > 0 ? Date.now() + (gameState.options.timeLimit * 1000) : null;
@@ -251,7 +315,7 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
             const now = Date.now();
             const timeLeft = Math.max(0, Math.ceil((gameState.endTime - now) / 1000));
             
-            timerElement.innerHTML = `<i data-lucide="clock"></i> ${timeLeft}s`;
+            timerElement.innerHTML = `<i data-lucide=\"clock\"></i> ${timeLeft}s`;
             lucide.createIcons();
             
             if (timeLeft <= 10 && timeLeft > 0) {
