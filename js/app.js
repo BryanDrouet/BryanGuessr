@@ -135,7 +135,7 @@ const initBryanGuessr = () => {
         app.appendChild(createGlobalHeader('BryanGuessr'));
 
         const main = document.createElement('main');
-        main.className = 'game-main';
+        main.className = 'game-main page-transition';
         main.style.display = 'flex';
         main.style.flexDirection = 'column';
 
@@ -168,7 +168,7 @@ const initBryanGuessr = () => {
         app.appendChild(createGlobalHeader('', renderHome));
 
         const main = document.createElement('main');
-        main.className = 'game-main';
+        main.className = 'game-main page-transition';
         main.style.display = 'flex';
         main.style.flexDirection = 'column';
         main.style.justifyContent = 'center';
@@ -187,6 +187,7 @@ const initBryanGuessr = () => {
         const labelTime = document.createElement('label');
         labelTime.setAttribute('for', 'time-limit');
         labelTime.textContent = 'Temps par partie :';
+        
         const selectTime = document.createElement('select');
         selectTime.id = 'time-limit';
         selectTime.name = 'time_limit';
@@ -195,9 +196,44 @@ const initBryanGuessr = () => {
             <option value="60">1 minute</option>
             <option value="120">2 minutes</option>
             <option value="180">3 minutes</option>
+            <option value="custom">Personnalisé...</option>
         `;
+
+        const customTimeWrapper = document.createElement('div');
+        customTimeWrapper.className = 'custom-time-wrapper';
+        customTimeWrapper.style.display = 'none';
+
+        const customTimeLabel = document.createElement('label');
+        customTimeLabel.setAttribute('for', 'custom-time');
+        customTimeLabel.textContent = 'Durée en secondes :';
+        customTimeLabel.style.fontSize = '0.9rem';
+        customTimeLabel.style.marginTop = '10px';
+
+        const customTimeInput = document.createElement('input');
+        customTimeInput.type = 'number';
+        customTimeInput.id = 'custom-time';
+        customTimeInput.name = 'custom_time';
+        customTimeInput.min = '1';
+        customTimeInput.placeholder = 'Ex: 45';
+        customTimeInput.className = 'custom-time-input';
+
+        customTimeWrapper.appendChild(customTimeLabel);
+        customTimeWrapper.appendChild(customTimeInput);
+
+        selectTime.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                customTimeWrapper.style.display = 'flex';
+                customTimeInput.required = true;
+            } else {
+                customTimeWrapper.style.display = 'none';
+                customTimeInput.required = false;
+                customTimeInput.value = '';
+            }
+        });
+
         groupTime.appendChild(labelTime);
         groupTime.appendChild(selectTime);
+        groupTime.appendChild(customTimeWrapper);
 
         const groupMove = document.createElement('div');
         groupMove.className = 'form-group form-group-checkbox';
@@ -249,24 +285,24 @@ const initBryanGuessr = () => {
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            let timeLimitValue = 0;
+            if (selectTime.value === 'custom') {
+                timeLimitValue = parseInt(customTimeInput.value, 10);
+                if (isNaN(timeLimitValue) || timeLimitValue < 1) {
+                    timeLimitValue = 0;
+                }
+            } else {
+                timeLimitValue = parseInt(selectTime.value, 10);
+            }
+
             const options = {
-                timeLimit: parseInt(document.getElementById('time-limit').value, 10),
+                timeLimit: timeLimitValue,
                 allowMove: document.getElementById('allow-move').checked,
                 allowPan: document.getElementById('allow-pan').checked
             };
 
-            let endTime = null;
-            if (options.timeLimit > 0) {
-                endTime = Date.now() + (options.timeLimit * 1000);
-            }
-
-            localStorage.setItem('bryanGuessrGameState', JSON.stringify({
-                parkId: park.id,
-                options: options,
-                endTime: endTime
-            }));
-
-            renderGame(park, options, endTime);
+            renderGame(park, options, null);
         });
 
         main.appendChild(title);
@@ -276,7 +312,7 @@ const initBryanGuessr = () => {
         lucide.createIcons();
     };
 
-    const renderGame = (park, options, endTime) => {
+    const renderGame = (park, options, restoredEndTime) => {
         app.innerHTML = '';
 
         const header = document.createElement('header');
@@ -304,7 +340,7 @@ const initBryanGuessr = () => {
         header.appendChild(scoreBoard);
 
         const main = document.createElement('main');
-        main.className = 'game-main';
+        main.className = 'game-main page-transition';
 
         const panoramaContainer = document.createElement('section');
         panoramaContainer.id = 'panorama-container';
@@ -312,8 +348,22 @@ const initBryanGuessr = () => {
 
         const mapInterface = document.createElement('section');
         mapInterface.id = 'map-interface';
-        mapInterface.className = 'hidden';
-        mapInterface.setAttribute('aria-hidden', 'true');
+        mapInterface.setAttribute('aria-label', 'Interface de la carte');
+
+        const mapHeader = document.createElement('div');
+        mapHeader.className = 'map-header';
+
+        const mapTitle = document.createElement('span');
+        mapTitle.textContent = 'Carte';
+
+        const btnResizeMap = document.createElement('button');
+        btnResizeMap.id = 'btn-resize-map';
+        btnResizeMap.type = 'button';
+        btnResizeMap.setAttribute('aria-label', 'Agrandir la carte');
+        btnResizeMap.innerHTML = '<i data-lucide="maximize"></i>';
+
+        mapHeader.appendChild(mapTitle);
+        mapHeader.appendChild(btnResizeMap);
 
         const mapContainer = document.createElement('div');
         mapContainer.id = 'map-container';
@@ -323,31 +373,72 @@ const initBryanGuessr = () => {
         btnGuess.setAttribute('aria-label', 'Valider ma position géographique');
         btnGuess.innerHTML = `<i data-lucide="map-pin"></i> Valider`;
 
+        btnResizeMap.addEventListener('click', () => {
+            const isExpanded = mapInterface.classList.toggle('expanded');
+            btnResizeMap.innerHTML = isExpanded ? '<i data-lucide="minimize"></i>' : '<i data-lucide="maximize"></i>';
+            btnResizeMap.setAttribute('aria-label', isExpanded ? 'Rétrécir la carte' : 'Agrandir la carte');
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 300);
+        });
+
+        mapInterface.appendChild(mapHeader);
         mapInterface.appendChild(mapContainer);
         mapInterface.appendChild(btnGuess);
 
-        const btnToggleMap = document.createElement('button');
-        btnToggleMap.id = 'btn-toggle-map';
-        btnToggleMap.setAttribute('aria-expanded', 'false');
-        btnToggleMap.setAttribute('aria-controls', 'map-interface');
-        btnToggleMap.innerHTML = `<i data-lucide="map"></i>`;
-
-        btnToggleMap.addEventListener('click', () => {
-            const isExpanded = btnToggleMap.getAttribute('aria-expanded') === 'true';
-            btnToggleMap.setAttribute('aria-expanded', String(!isExpanded));
-            mapInterface.classList.toggle('hidden');
-            mapInterface.setAttribute('aria-hidden', String(isExpanded));
-        });
-
         main.appendChild(panoramaContainer);
         main.appendChild(mapInterface);
-        main.appendChild(btnToggleMap);
 
         app.appendChild(header);
         app.appendChild(main);
         
         lucide.createIcons();
-        initMapAndPanorama(park, options, endTime, showNotification);
+
+        if (restoredEndTime) {
+            initMapAndPanorama(park, options, restoredEndTime, showNotification);
+        } else {
+            const overlay = document.createElement('div');
+            overlay.className = 'countdown-overlay';
+            app.appendChild(overlay);
+
+            let count = 3;
+            const countSpan = document.createElement('span');
+            countSpan.textContent = count;
+            overlay.appendChild(countSpan);
+
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countSpan.textContent = count;
+                    countSpan.style.animation = 'none';
+                    countSpan.offsetHeight;
+                    countSpan.style.animation = null;
+                } else if (count === 0) {
+                    countSpan.textContent = 'GO!';
+                    countSpan.style.animation = 'none';
+                    countSpan.offsetHeight;
+                    countSpan.style.animation = null;
+                } else {
+                    clearInterval(countInterval);
+                    overlay.remove();
+
+                    let newEndTime = null;
+                    if (options.timeLimit > 0) {
+                        newEndTime = Date.now() + (options.timeLimit * 1000);
+                    }
+
+                    localStorage.setItem('bryanGuessrGameState', JSON.stringify({
+                        parkId: park.id,
+                        options: options,
+                        endTime: newEndTime
+                    }));
+
+                    initMapAndPanorama(park, options, newEndTime, showNotification);
+                }
+            }, 1000);
+        }
     };
 
     const initMapAndPanorama = (park, options, endTime, notify) => {
@@ -407,6 +498,15 @@ const initBryanGuessr = () => {
             const btn = document.getElementById('btn-guess');
             map.off('click');
 
+            const mainContainer = document.querySelector('.game-main');
+            if (mainContainer) {
+                mainContainer.classList.remove('time-critical', 'active');
+            }
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.classList.remove('timer-critical');
+            }
+
             let distance = 0;
             let points = 0;
 
@@ -449,6 +549,7 @@ const initBryanGuessr = () => {
 
             const endScreen = document.createElement('div');
             endScreen.id = 'end-screen';
+            endScreen.className = 'page-transition';
             endScreen.setAttribute('role', 'dialog');
             endScreen.setAttribute('aria-labelledby', 'end-title');
 
@@ -469,16 +570,7 @@ const initBryanGuessr = () => {
             btnSame.className = 'btn-replay-same';
             btnSame.innerHTML = `<i data-lucide="rotate-cw"></i> Rejouer (Mêmes réglages)`;
             btnSame.addEventListener('click', () => {
-                let newEndTime = null;
-                if (options.timeLimit > 0) {
-                    newEndTime = Date.now() + (options.timeLimit * 1000);
-                }
-                localStorage.setItem('bryanGuessrGameState', JSON.stringify({
-                    parkId: park.id,
-                    options: options,
-                    endTime: newEndTime
-                }));
-                renderGame(park, options, newEndTime);
+                renderGame(park, options, null);
             });
 
             const btnDiff = document.createElement('button');
@@ -497,16 +589,15 @@ const initBryanGuessr = () => {
 
             endScreen.appendChild(contentWrapper);
 
-            document.getElementById('btn-toggle-map').style.display = 'none';
             document.getElementById('map-interface').style.display = 'none';
 
-            const mapContainer = document.getElementById('map-container');
-            endScreen.appendChild(mapContainer);
+            const mapContainerToMove = document.getElementById('map-container');
+            endScreen.appendChild(mapContainerToMove);
 
             document.querySelector('.game-main').appendChild(endScreen);
 
             setTimeout(() => {
-                map.invalidateSize();
+                window.dispatchEvent(new Event('resize'));
             }, 100);
 
             lucide.createIcons();
@@ -514,6 +605,8 @@ const initBryanGuessr = () => {
 
         if (endTime) {
             const timerElement = document.getElementById('timer');
+            const mainContainer = document.querySelector('.game-main');
+
             timerInterval = setInterval(() => {
                 const now = Date.now();
                 const timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
@@ -521,6 +614,14 @@ const initBryanGuessr = () => {
                 timerElement.innerHTML = `<i data-lucide="clock"></i> ${timeLeft}s`;
                 lucide.createIcons();
                 
+                if (timeLeft <= 10 && timeLeft > 0) {
+                    mainContainer.classList.add('time-critical', 'active');
+                    timerElement.classList.add('timer-critical');
+                } else {
+                    mainContainer.classList.remove('time-critical', 'active');
+                    timerElement.classList.remove('timer-critical');
+                }
+
                 if (timeLeft <= 0) {
                     handleValidation(true);
                 }
