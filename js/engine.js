@@ -1,6 +1,13 @@
-function createSvgIcon(fillColor) {
+function createSvgIcon(type, fillColor) {
+    let path = '';
+    if (type === 'pin') {
+        path = `<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3" fill="#ffffff"></circle>`;
+    } else if (type === 'flag') {
+        path = `<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="3"></line>`;
+    }
+
     return L.divIcon({
-        html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${fillColor}" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 100%; height: 100%; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4));"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3" fill="#ffffff"></circle></svg>`,
+        html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${fillColor}" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 100%; height: 100%; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4));">${path}</svg>`,
         className: 'custom-svg-marker',
         iconSize: [36, 36],
         iconAnchor: [18, 36]
@@ -11,27 +18,27 @@ function initMapAndPanorama(park, gameState, notify) {
     const panoContainer = document.getElementById('panorama-container');
     panoContainer.innerHTML = '';
 
-    const scene = document.createElement('a-scene');
-    scene.setAttribute('embedded', '');
-    scene.setAttribute('vr-mode-ui', 'enabled: false');
-    scene.setAttribute('loading-screen', 'enabled: false');
-
-    const sky = document.createElement('a-sky');
-    sky.setAttribute('src', park.defaultPano);
-    
-    sky.addEventListener('materialtextureloaded', () => {
-        if (isDebug) {
-            notify('Panorama chargé avec succès.', 'success');
+    try {
+        pannellum.viewer('panorama-container', {
+            type: 'equirectangular',
+            panorama: park.defaultPano,
+            autoLoad: true,
+            compass: false,
+            showControls: false,
+            draggable: gameState.options.allowPan,
+            mouseZoom: gameState.options.allowPan,
+            keyboardZoom: gameState.options.allowPan,
+            onLoad: () => {
+                if (typeof isDebug !== 'undefined' && isDebug) {
+                    notify('Panorama chargé avec succès.', 'success');
+                }
+            }
+        });
+    } catch (error) {
+        if (typeof isDebug !== 'undefined' && isDebug) {
+            notify('Erreur lors du chargement de l\'image 360°.', 'error');
         }
-    });
-
-    const camera = document.createElement('a-camera');
-    camera.setAttribute('look-controls', `enabled: ${gameState.options.allowPan}; reverseMouseDrag: true`);
-    camera.setAttribute('wasd-controls', 'enabled: false');
-
-    scene.appendChild(sky);
-    scene.appendChild(camera);
-    panoContainer.appendChild(scene);
+    }
 
     const baseMaps = {
         "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
@@ -53,8 +60,8 @@ function initMapAndPanorama(park, gameState, notify) {
         localStorage.setItem('bryanGuessrMapLayer', e.name);
     });
 
-    const userIcon = createSvgIcon('#007bff');
-    const targetIcon = createSvgIcon('#34c759');
+    const userIcon = createSvgIcon('pin', '#007bff');
+    const targetIcon = createSvgIcon('flag', '#34c759');
 
     let currentMarker = null;
 
