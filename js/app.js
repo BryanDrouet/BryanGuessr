@@ -292,6 +292,31 @@ const initBryanGuessr = () => {
 
         let timerInterval = null;
 
+        const handleValidation = (isTimeout = false) => {
+            if (!currentMarker && !isTimeout) {
+                notify('Veuillez placer un marqueur sur la carte avant de valider.', 'error');
+                return;
+            }
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            const btn = document.getElementById('btn-guess');
+            btn.disabled = true;
+
+            if (!currentMarker && isTimeout) {
+                btn.innerHTML = '<i data-lucide="x"></i> Temps écoulé';
+                lucide.createIcons();
+                notify('Temps écoulé ! Aucun point marqué.', 'warning');
+                return;
+            }
+
+            btn.innerHTML = '<i data-lucide="check"></i> Position enregistrée';
+            lucide.createIcons();
+            notify('Position enregistrée avec succès !', 'success');
+        };
+
         if (options.timeLimit > 0) {
             let timeLeft = options.timeLimit;
             const timerElement = document.getElementById('timer');
@@ -300,27 +325,13 @@ const initBryanGuessr = () => {
                 timerElement.innerHTML = `<i data-lucide="clock"></i> ${timeLeft}s`;
                 lucide.createIcons();
                 if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById('btn-guess').click();
+                    handleValidation(true);
                 }
             }, 1000);
         }
 
         document.getElementById('btn-guess').addEventListener('click', () => {
-            if (!currentMarker) {
-                notify('Veuillez placer un marqueur sur la carte avant de valider.', 'error');
-                return;
-            }
-
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            const btn = document.getElementById('btn-guess');
-            btn.innerHTML = '<i data-lucide="check"></i> Position enregistrée';
-            lucide.createIcons();
-            
-            notify('Position enregistrée avec succès !', 'success');
+            handleValidation(false);
         });
     };
 
