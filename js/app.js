@@ -388,7 +388,7 @@ function renderGame(park, gameState) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function bootstrapBryanGuessr() {
     const currentTheme = localStorage.getItem('bryanGuessrTheme') || 'system';
     applyTheme(currentTheme);
 
@@ -432,4 +432,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         renderHome();
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrapBryanGuessr);
+} else {
+    bootstrapBryanGuessr();
+}

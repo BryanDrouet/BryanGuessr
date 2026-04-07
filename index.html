@@ -36,7 +36,7 @@
         jsFiles.forEach(file => {
             const jsScript = document.createElement('script');
             jsScript.src = file + '?v=' + cacheBuster;
-            jsScript.defer = true;
+            jsScript.async = false;
             document.body.appendChild(jsScript);
         });
     </script>
