@@ -357,12 +357,69 @@ const initBryanGuessr = () => {
 
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
-            newBtn.innerHTML = '<i data-lucide="home"></i> Retour au menu';
-            lucide.createIcons();
+            newBtn.innerHTML = '<i data-lucide="home"></i> Menu principal';
             
             newBtn.addEventListener('click', () => {
                 renderHome();
             });
+
+            document.getElementById('panorama-container').style.display = 'none';
+
+            const endScreen = document.createElement('div');
+            endScreen.id = 'end-screen';
+            endScreen.setAttribute('role', 'dialog');
+            endScreen.setAttribute('aria-labelledby', 'end-title');
+
+            const endTitle = document.createElement('h2');
+            endTitle.id = 'end-title';
+            endTitle.className = 'end-title';
+            endTitle.textContent = (!currentMarker && isTimeout) ? 'Temps écoulé !' : 'Manche terminée !';
+
+            const endStats = document.createElement('div');
+            endStats.className = 'end-stats';
+            if (!currentMarker && isTimeout) {
+                endStats.innerHTML = `Aucun point marqué.`;
+            } else {
+                endStats.innerHTML = `Distance : ${Math.round(distance)}m<br><span class="end-score">+${points} pts</span>`;
+            }
+
+            const btnSame = document.createElement('button');
+            btnSame.className = 'btn-replay-same';
+            btnSame.innerHTML = `<i data-lucide="rotate-cw"></i> Rejouer (Mêmes réglages)`;
+            btnSame.addEventListener('click', () => {
+                let newEndTime = null;
+                if (options.timeLimit > 0) {
+                    newEndTime = Date.now() + (options.timeLimit * 1000);
+                }
+                localStorage.setItem('bryanGuessrGameState', JSON.stringify({
+                    parkId: park.id,
+                    options: options,
+                    endTime: newEndTime
+                }));
+                renderGame(park, options, newEndTime);
+            });
+
+            const btnDiff = document.createElement('button');
+            btnDiff.className = 'btn-replay-diff';
+            btnDiff.innerHTML = `<i data-lucide="settings"></i> Modifier les réglages`;
+            btnDiff.addEventListener('click', () => {
+                renderOptions(park);
+            });
+
+            endScreen.appendChild(endTitle);
+            endScreen.appendChild(endStats);
+            endScreen.appendChild(btnSame);
+            endScreen.appendChild(btnDiff);
+
+            document.querySelector('.game-main').appendChild(endScreen);
+
+            const mapInterface = document.getElementById('map-interface');
+            const toggleMapBtn = document.getElementById('btn-toggle-map');
+            if (mapInterface.classList.contains('hidden')) {
+                toggleMapBtn.click();
+            }
+
+            lucide.createIcons();
         };
 
         if (endTime) {
