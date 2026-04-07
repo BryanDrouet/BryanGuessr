@@ -11,10 +11,13 @@
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script>
         const cacheBuster = new Date().getTime();
-        const cssLink = document.createElement('link');
-        cssLink.rel = 'stylesheet';
-        cssLink.href = 'css/style.css?v=' + cacheBuster;
-        document.head.appendChild(cssLink);
+        const cssFiles = ['css/base.css', 'css/ui.css', 'css/game.css'];
+        cssFiles.forEach(file => {
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = file + '?v=' + cacheBuster;
+            document.head.appendChild(cssLink);
+        });
     </script>
 </head>
 <body>
@@ -29,10 +32,13 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        const jsScript = document.createElement('script');
-        jsScript.src = 'js/app.js?v=' + cacheBuster;
-        jsScript.defer = true;
-        document.body.appendChild(jsScript);
+        const jsFiles = ['js/data.js', 'js/engine.js', 'js/app.js'];
+        jsFiles.forEach(file => {
+            const jsScript = document.createElement('script');
+            jsScript.src = file + '?v=' + cacheBuster;
+            jsScript.defer = true;
+            document.body.appendChild(jsScript);
+        });
     </script>
 </body>
 </html>
