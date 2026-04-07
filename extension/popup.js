@@ -44,8 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     downloadBtn.addEventListener('click', async () => {
         console.log("Bouton Télécharger cliqué");
-        chrome.storage.local.get(['panoList'], async (data) => {
-            const list = data.panoList || [];
+        
+        chrome.storage.local.get(['panoList'], async (dataLocal) => {
+            const list = dataLocal.panoList || [];
             if (list.length === 0) {
                 console.log("Liste vide, annulation");
                 return;
@@ -53,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             downloadBtn.disabled = true;
             notification.textContent = "Initialisation...";
+            let successCount = 0;
+            let errorCount = 0;
             
             try {
                 const zip = new JSZip();
@@ -60,41 +63,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 for (let i = 0; i < list.length; i++) {
                     const item = list[i];
-                    notification.textContent = `Téléchargement ${i + 1}/${list.length}...`;
+                    notification.textContent = `Téléchargement panorama ${i + 1}/${list.length}...`;
                     
-                    // Utiliser l'API Google Street View Static pour des images fixes haute qualité
-                    const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=1024x680&location=${item.lat},${item.lng}&heading=0&pitch=0&fov=90&return_error_codes=true`;                    
-                    console.log(`Récupération de ${item.id}...`);
+                    console.log(`Récupération du panorama ${item.id}...`);
                     
                     try {
-                        const response = await fetch(imageUrl);
-                        if (!response.ok) {
-                            console.warn(`Erreur HTTP pour ${item.id}: ${response.status}`);
-                            throw new Error(`Erreur HTTP: ${response.status}`);
+                        // Créer un dossier pour ce panorama
+                        const panoFolder = zip.folder(item.id);
+                        
+                        // Télécharger les tuiles panoramiques (images cubiques: top, bottom, left, right, front, back)
+                        // Pour chaque niveau de zoom (0 = basse, 5 = haute résolution)
+                        const zoom = 3; // Bon compromis qualité/taille
+                        const tiles = ['0', '1', '2', '3', '4', '5']; // 6 faces du cube
+                        
+                        let tilesDownloaded = 0;
+                        for (const tile of tiles) {
+                            const tileUrl = `https://cbk0.google.com/cbk?output=tile&panoid=${item.id}&zoom=${zoom}&x=${tile}&y=0`;
+                            
+                            try {
+                                const response = await fetch(tileUrl, { mode: 'no-cors' });
+                                if (response.ok) {
+                                    const blob = await response.blob();
+                                    panoFolder.file(`tile_${zoom}_${tile}.jpg`, blob);
+                                    tilesDownloaded++;
+                                }
+                            } catch (e) {
+                                console.warn(`Erreur tuile ${tile} pour ${item.id}: ${e.message}`);
+                            }
+                            
+                            // Petit délai pour ne pas spammer Google
+                            await new Promise(resolve => setTimeout(resolve, 100));
                         }
-                        const blob = await response.blob();
-                        zip.file(`${item.id}.jpg`, blob);
+                        
+                        // Sauvegarder aussi les métadonnées
+                        panoFolder.file('metadata.json', JSON.stringify({
+                            id: item.id,
+                            lat: item.lat,
+                            lng: item.lng,
+                            tiles: tilesDownloaded,
+                            zoom: zoom
+                        }, null, 2));
+                        
+                        if (tilesDownloaded > 0) {
+                            successCount++;
+                            console.log(`✓ Panorama ${item.id}: ${tilesDownloaded} tuiles téléchargées`);
+                        } else {
+                            errorCount++;
+                            console.warn(`✗ Aucune tuile trouvée pour ${item.id}`);
+                            zip.remove(item.id);
+                        }
                     } catch (error) {
-                        console.error(`Erreur pour ${item.id}:`, error);
-                        throw error;
+                        console.error(`Erreur pour ${item.id}:`, error.message);
+                        errorCount++;
                     }
+                }
+
+                if (successCount === 0) {
+                    throw new Error("Aucun panorama téléchargé - Vérifiez les pano IDs");
                 }
 
                 notification.textContent = "Compression du ZIP...";
                 const content = await zip.generateAsync({type: "blob"});
                 const url = URL.createObjectURL(content);
                 
-                console.log("Lancement du téléchargement via Chrome");
+                console.log(`Téléchargement: ${successCount} panoramas, ${errorCount} erreurs`);
                 chrome.downloads.download({
                     url: url,
                     filename: "panoramas_puydufou.zip",
                     saveAs: true
                 });
 
-                notification.textContent = "Terminé !";
+                notification.textContent = `✓ ${successCount} panoramas téléchargés`;
             } catch (error) {
                 console.error("Crash du téléchargement:", error);
-                notification.textContent = "ERREUR : Voir console";
+                notification.textContent = `❌ ${error.message}`;
             } finally {
                 downloadBtn.disabled = false;
                 setTimeout(() => notification.textContent = "", 5000);

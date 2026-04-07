@@ -321,14 +321,19 @@ function renderGame(park, gameState) {
     const mapTitle = document.createElement('span');
     mapTitle.textContent = 'Carte';
 
-    const btnResizeMap = document.createElement('button');
-    btnResizeMap.id = 'btn-resize-map';
-    btnResizeMap.type = 'button';
-    btnResizeMap.setAttribute('aria-label', 'Agrandir la carte');
-    btnResizeMap.innerHTML = '<i data-lucide="maximize"></i>';
+    const mapButtonsContainer = document.createElement('div');
+    mapButtonsContainer.className = 'map-buttons-container';
+
+    const btnToggleMap = document.createElement('button');
+    btnToggleMap.id = 'btn-toggle-map';
+    btnToggleMap.type = 'button';
+    btnToggleMap.setAttribute('aria-label', 'Agrandir la carte');
+    btnToggleMap.innerHTML = '<i data-lucide="maximize"></i>';
+
+    mapButtonsContainer.appendChild(btnToggleMap);
 
     mapHeader.appendChild(mapTitle);
-    mapHeader.appendChild(btnResizeMap);
+    mapHeader.appendChild(mapButtonsContainer);
 
     const mapContainer = document.createElement('div');
     mapContainer.id = 'map-container';
@@ -337,14 +342,31 @@ function renderGame(park, gameState) {
     btnGuess.id = 'btn-guess';
     btnGuess.setAttribute('aria-label', 'Valider ma position géographique');
     btnGuess.innerHTML = `<i data-lucide="map-pin"></i> Valider`;
+    
+    btnGuess.addEventListener('click', () => {
+        handleValidation(park, gameState, currentLocation, showNotification);
+    });
 
-    mapHeader.addEventListener('click', () => {
+    mapHeader.addEventListener('click', (e) => {
+        // Toggle expand/collapse sur n'importe quel click dans le header
         const isExpanded = mapInterface.classList.toggle('expanded');
-        btnResizeMap.innerHTML = isExpanded ? '<i data-lucide="minimize"></i>' : '<i data-lucide="maximize"></i>';
-        btnResizeMap.setAttribute('aria-label', isExpanded ? 'Rétrécir la carte' : 'Agrandir la carte');
+        
+        // Changer l'icône du bouton
+        if (isExpanded) {
+            btnToggleMap.setAttribute('aria-label', 'Réduire la carte');
+            btnToggleMap.innerHTML = '<i data-lucide="minimize-2"></i>';
+        } else {
+            btnToggleMap.setAttribute('aria-label', 'Agrandir la carte');
+            btnToggleMap.innerHTML = '<i data-lucide="maximize"></i>';
+        }
+        
         lucide.createIcons();
         
+        // Redessiner la carte après le changement de taille
         setTimeout(() => {
+            if (window.leafletMap) {
+                window.leafletMap.invalidateSize();
+            }
             window.dispatchEvent(new Event('resize'));
         }, 300);
     });

@@ -3,6 +3,11 @@
     position: relative;
 }
 
+.game-main.layout-margin {
+    overflow-x: visible;
+    overflow-y: auto;
+}
+
 .game-main.time-critical::after {
     content: '';
     position: absolute;
@@ -123,6 +128,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     z-index: 15;
     padding: 20px;
     padding-bottom: max(30px, env(safe-area-inset-bottom));
@@ -231,6 +237,25 @@
     height: calc(100dvh - 120px);
 }
 
+/* Quand un écran de fin est affiché */
+#map-interface.during-end-screen {
+    position: fixed;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 600px;
+    height: 300px;
+    z-index: 25;
+    border-radius: 16px;
+}
+
+#map-interface.during-end-screen.expanded {
+    width: calc(100vw - 40px);
+    height: calc(100dvh - 120px);
+}
+
 .map-header {
     display: flex;
     justify-content: space-between;
@@ -253,7 +278,13 @@
     font-size: 0.95rem;
 }
 
-#btn-resize-map {
+.map-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#btn-toggle-map {
     background: transparent;
     border: none;
     color: var(--text-main);
@@ -264,7 +295,52 @@
     padding: 4px;
     border-radius: 4px;
     transition: all 0.3s ease;
-    pointer-events: none;
+    pointer-events: auto;
+}
+
+/* Styliser les boutons Leaflet (zoom controls) */
+.leaflet-control-zoom {
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg-panel) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+    background: var(--bg-panel) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    font-size: 18px !important;
+    transition: all 0.2s ease !important;
+}
+
+.leaflet-control-zoom-in:first-child {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom-out:hover {
+    background-color: var(--btn-hover) !important;
+}
+
+.leaflet-control-zoom-in:disabled,
+.leaflet-control-zoom-out:disabled,
+.leaflet-control-zoom-in.leaflet-disabled,
+.leaflet-control-zoom-out.leaflet-disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
 }
 
 #map-container {
