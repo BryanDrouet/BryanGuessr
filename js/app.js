@@ -12,6 +12,14 @@ const initBryanGuessr = () => {
         rgpdBanner.classList.add('hidden');
     });
 
+    const parks = [
+        { id: 'puydufou', name: 'Puy du Fou', lat: 46.892, lng: -0.930, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+        { id: 'asterix', name: 'Parc Astérix', lat: 49.134, lng: 2.571, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+        { id: 'disneyland', name: 'Disneyland Paris', lat: 48.872, lng: 2.775, zoom: 14, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+        { id: 'futuroscope', name: 'Futuroscope', lat: 46.669, lng: 0.366, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
+        { id: 'ogliss', name: 'O\'Gliss Parc', lat: 46.425, lng: -1.488, zoom: 16, defaultPano: 'https://pannellum.org/images/alma.jpg' }
+    ];
+
     const showNotification = (message, type = 'error') => {
         let container = document.getElementById('toast-container');
         if (!container) {
@@ -51,14 +59,6 @@ const initBryanGuessr = () => {
 
         const grid = document.createElement('div');
         grid.className = 'park-grid';
-
-        const parks = [
-            { id: 'puydufou', name: 'Puy du Fou', lat: 46.892, lng: -0.930, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-            { id: 'asterix', name: 'Parc Astérix', lat: 49.134, lng: 2.571, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-            { id: 'disneyland', name: 'Disneyland Paris', lat: 48.872, lng: 2.775, zoom: 14, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-            { id: 'futuroscope', name: 'Futuroscope', lat: 46.669, lng: 0.366, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-            { id: 'ogliss', name: 'O\'Gliss Parc', lat: 46.425, lng: -1.488, zoom: 16, defaultPano: 'https://pannellum.org/images/alma.jpg' }
-        ];
 
         parks.forEach(park => {
             const btn = document.createElement('button');
@@ -173,7 +173,19 @@ const initBryanGuessr = () => {
                 allowMove: document.getElementById('allow-move').checked,
                 allowPan: document.getElementById('allow-pan').checked
             };
-            renderGame(park, options);
+
+            let endTime = null;
+            if (options.timeLimit > 0) {
+                endTime = Date.now() + (options.timeLimit * 1000);
+            }
+
+            localStorage.setItem('bryanGuessrGameState', JSON.stringify({
+                parkId: park.id,
+                options: options,
+                endTime: endTime
+            }));
+
+            renderGame(park, options, endTime);
         });
 
         main.appendChild(title);
@@ -184,7 +196,7 @@ const initBryanGuessr = () => {
         lucide.createIcons();
     };
 
-    const renderGame = (park, options) => {
+    const renderGame = (park, options, endTime) => {
         app.innerHTML = '';
 
         const header = document.createElement('header');
@@ -193,7 +205,10 @@ const initBryanGuessr = () => {
         btnBack.className = 'btn-back';
         btnBack.setAttribute('aria-label', 'Quitter la partie');
         btnBack.innerHTML = `<i data-lucide="arrow-left"></i> Quitter`;
-        btnBack.addEventListener('click', () => renderOptions(park));
+        btnBack.addEventListener('click', () => {
+            localStorage.removeItem('bryanGuessrGameState');
+            renderOptions(park);
+        });
 
         const scoreBoard = document.createElement('div');
         scoreBoard.className = 'score-board';
@@ -201,7 +216,7 @@ const initBryanGuessr = () => {
         
         let timerHTML = '';
         if (options.timeLimit > 0) {
-            timerHTML = `<span id="timer" style="margin-right: 20px;"><i data-lucide="clock"></i> ${options.timeLimit}s</span>`;
+            timerHTML = `<span id="timer" style="margin-right: 20px;"><i data-lucide="clock"></i> --s</span>`;
         }
         scoreBoard.innerHTML = `${timerHTML}<span id="current-score">0</span> pts`;
 
@@ -252,10 +267,10 @@ const initBryanGuessr = () => {
         app.appendChild(main);
         
         lucide.createIcons();
-        initMapAndPanorama(park, options, showNotification);
+        initMapAndPanorama(park, options, endTime, showNotification);
     };
 
-    const initMapAndPanorama = (park, options, notify) => {
+    const initMapAndPanorama = (park, options, endTime, notify) => {
         try {
             pannellum.viewer('panorama-container', {
                 type: 'equirectangular',
@@ -265,10 +280,7 @@ const initBryanGuessr = () => {
                 showControls: false,
                 draggable: options.allowPan,
                 mouseZoom: options.allowPan,
-                keyboardZoom: options.allowPan,
-                onLoad: () => {
-                    notify('Panorama chargé avec succès.', 'success');
-                }
+                keyboardZoom: options.allowPan
             });
         } catch (error) {
             notify('Erreur lors du chargement de l\'image 360°.', 'error');
@@ -303,27 +315,65 @@ const initBryanGuessr = () => {
             }
 
             const btn = document.getElementById('btn-guess');
-            btn.disabled = true;
+            map.off('click');
 
-            if (!currentMarker && isTimeout) {
-                btn.innerHTML = '<i data-lucide="x"></i> Temps écoulé';
-                lucide.createIcons();
-                notify('Temps écoulé ! Aucun point marqué.', 'warning');
-                return;
+            let distance = 0;
+            let points = 0;
+
+            if (currentMarker) {
+                const pos = currentMarker.getLatLng();
+                const R = 6371e3;
+                const p1 = pos.lat * Math.PI / 180;
+                const p2 = park.lat * Math.PI / 180;
+                const dp = (park.lat - pos.lat) * Math.PI / 180;
+                const dl = (park.lng - pos.lng) * Math.PI / 180;
+                const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                distance = R * c;
+
+                if (distance < 20) {
+                    points = 5000;
+                } else {
+                    points = Math.max(0, Math.floor(5000 * Math.exp(-distance / 1000)));
+                }
+
+                document.getElementById('current-score').textContent = points;
+                
+                L.marker([park.lat, park.lng]).addTo(map);
+                L.polyline([pos, [park.lat, park.lng]], {color: 'red', weight: 3}).addTo(map);
+                map.fitBounds([pos, [park.lat, park.lng]], {padding: [30, 30]});
+            } else {
+                L.marker([park.lat, park.lng]).addTo(map);
+                map.setView([park.lat, park.lng], park.zoom);
             }
 
-            btn.innerHTML = '<i data-lucide="check"></i> Position enregistrée';
+            if (!currentMarker && isTimeout) {
+                notify('Temps écoulé ! Aucun point marqué.', 'warning');
+            } else {
+                notify(`Fin de la manche ! Distance : ${Math.round(distance)}m (+${points} pts)`, 'success');
+            }
+
+            localStorage.removeItem('bryanGuessrGameState');
+
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.innerHTML = '<i data-lucide="home"></i> Retour au menu';
             lucide.createIcons();
-            notify('Position enregistrée avec succès !', 'success');
+            
+            newBtn.addEventListener('click', () => {
+                renderHome();
+            });
         };
 
-        if (options.timeLimit > 0) {
-            let timeLeft = options.timeLimit;
+        if (endTime) {
             const timerElement = document.getElementById('timer');
             timerInterval = setInterval(() => {
-                timeLeft--;
+                const now = Date.now();
+                const timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
+                
                 timerElement.innerHTML = `<i data-lucide="clock"></i> ${timeLeft}s`;
                 lucide.createIcons();
+                
                 if (timeLeft <= 0) {
                     handleValidation(true);
                 }
@@ -335,7 +385,28 @@ const initBryanGuessr = () => {
         });
     };
 
-    renderHome();
+    const savedState = localStorage.getItem('bryanGuessrGameState');
+    if (savedState) {
+        try {
+            const state = JSON.parse(savedState);
+            const park = parks.find(p => p.id === state.parkId);
+            if (park) {
+                if (state.endTime && Date.now() >= state.endTime) {
+                    localStorage.removeItem('bryanGuessrGameState');
+                    renderHome();
+                } else {
+                    renderGame(park, state.options, state.endTime);
+                }
+            } else {
+                renderHome();
+            }
+        } catch (e) {
+            localStorage.removeItem('bryanGuessrGameState');
+            renderHome();
+        }
+    } else {
+        renderHome();
+    }
 };
 
 if (document.readyState === 'loading') {
