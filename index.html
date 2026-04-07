@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BryanGuessr : Testez vos connaissances géographiques et repérez-vous dans vos parcs d'attractions préférés.">
+    <title>BryanGuessr</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app" aria-live="polite"></div>
+
+    <div id="rgpd-banner" role="dialog" aria-labelledby="rgpd-title" aria-describedby="rgpd-desc" class="hidden">
+        <h2 id="rgpd-title">Gestion des données</h2>
+        <p id="rgpd-desc">BryanGuessr utilise le stockage local pour sauvegarder vos scores conformément au RGPD.</p>
+        <button id="btn-accept-rgpd" aria-label="Accepter et fermer">Compris</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 BryanGuessr - Projet Privé</p>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <script src="js/app.js" defer></script>
+</body>
+</html>
