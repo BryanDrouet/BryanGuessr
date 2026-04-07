@@ -1,12 +1,76 @@
 const isDebug = new URLSearchParams(window.location.search).get('debug') === 'true';
 
 const parks = [
-    { id: 'puydufou', name: 'Puy du Fou', lat: 46.892, lng: -0.930, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-    { id: 'asterix', name: 'Parc Astérix', lat: 49.134, lng: 2.571, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-    { id: 'disneyland', name: 'Disneyland Paris', lat: 48.872, lng: 2.775, zoom: 14, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-    { id: 'futuroscope', name: 'Futuroscope', lat: 46.669, lng: 0.366, zoom: 15, defaultPano: 'https://pannellum.org/images/alma.jpg' },
-    { id: 'ogliss', name: 'O\'Gliss Parc', lat: 46.425, lng: -1.488, zoom: 16, defaultPano: 'https://pannellum.org/images/alma.jpg' }
+    { 
+        id: 'puydufou', 
+        name: 'Puy du Fou', 
+        centerLat: 46.892, 
+        centerLng: -0.930, 
+        zoom: 15, 
+        locations: [
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.8925, lng: -0.9305 },
+            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 46.8910, lng: -0.9290 },
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.8930, lng: -0.9315 }
+        ]
+    },
+    { 
+        id: 'asterix', 
+        name: 'Parc Astérix', 
+        centerLat: 49.134, 
+        centerLng: 2.571, 
+        zoom: 15, 
+        locations: [
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 49.1345, lng: 2.5715 },
+            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 49.1330, lng: 2.5700 },
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 49.1350, lng: 2.5720 }
+        ]
+    },
+    { 
+        id: 'disneyland', 
+        name: 'Disneyland Paris', 
+        centerLat: 48.872, 
+        centerLng: 2.775, 
+        zoom: 14, 
+        locations: [
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 48.8725, lng: 2.7755 },
+            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 48.8710, lng: 2.7740 },
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 48.8730, lng: 2.7760 }
+        ]
+    },
+    { 
+        id: 'futuroscope', 
+        name: 'Futuroscope', 
+        centerLat: 46.669, 
+        centerLng: 0.366, 
+        zoom: 15, 
+        locations: [
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.6695, lng: 0.3665 },
+            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 46.6680, lng: 0.3650 },
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.6700, lng: 0.3670 }
+        ]
+    },
+    { 
+        id: 'ogliss', 
+        name: 'O\'Gliss Parc', 
+        centerLat: 46.425, 
+        centerLng: -1.488, 
+        zoom: 16, 
+        locations: [
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.4255, lng: -1.4885 },
+            { pano: 'https://pannellum.org/images/bma-0.jpg', lat: 46.4240, lng: -1.4870 },
+            { pano: 'https://pannellum.org/images/alma.jpg', lat: 46.4260, lng: -1.4890 }
+        ]
+    }
 ];
+
+function generateRoundLocations(park, totalRounds) {
+    const shuffled = [...park.locations].sort(() => 0.5 - Math.random());
+    const selected = [];
+    for (let i = 0; i < totalRounds; i++) {
+        selected.push(shuffled[i % shuffled.length]);
+    }
+    return selected;
+}
 
 function showNotification(message, type = 'error') {
     let container = document.getElementById('toast-container');

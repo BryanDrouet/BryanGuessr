@@ -239,6 +239,7 @@ function renderOptions(park) {
                 allowPan: document.getElementById('allow-pan').checked,
                 totalRounds: roundsValue
             },
+            roundLocations: generateRoundLocations(park, roundsValue),
             currentRound: 1,
             totalScore: 0,
             endTime: timeLimitValue > 0 ? Date.now() + (timeLimitValue * 1000) : null
@@ -349,8 +350,10 @@ function renderGame(park, gameState) {
     
     lucide.createIcons();
 
+    const currentLocation = gameState.roundLocations[gameState.currentRound - 1];
+
     if (gameState.endTime || gameState.options.timeLimit === 0) {
-        initMapAndPanorama(park, gameState, showNotification);
+        initMapAndPanorama(park, gameState, currentLocation, showNotification);
     } else {
         const overlay = document.createElement('div');
         overlay.className = 'countdown-overlay';
@@ -382,7 +385,7 @@ function renderGame(park, gameState) {
                     localStorage.setItem('bryanGuessrGameState', JSON.stringify(gameState));
                 }
 
-                initMapAndPanorama(park, gameState, showNotification);
+                initMapAndPanorama(park, gameState, currentLocation, showNotification);
             }
         }, 1000);
     }
