@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Bryan Pano Grabber",
+  "version": "2.0",
+  "description": "Scanne et enregistre automatiquement les ID Street View uniques.",
+  "permissions": [
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "*://www.google.fr/maps/*",
+    "*://www.google.com/maps/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.google.fr/maps/*",
+        "*://www.google.com/maps/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}

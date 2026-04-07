@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { 
+            font-family: system-ui, sans-serif; 
+            padding: 15px; 
+            width: 300px; 
+            background: #1c1c1e; 
+            color: #ffffff; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        h3 { 
+            margin: 0; 
+            text-align: center; 
+            font-size: 1.2rem;
+        }
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2c2c2e;
+            padding: 10px 15px;
+            border-radius: 12px;
+        }
+        .toggle-label {
+            font-weight: 500;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #38383a;
+            transition: .3s;
+            border-radius: 30px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider {
+            background-color: #34c759;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .stats {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #ebebf5;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            box-sizing: border-box;
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #38383a;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            resize: none;
+            outline: none;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        button { 
+            flex: 1;
+            padding: 10px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #ffffff;
+        }
+        #copy-btn { background: #0a84ff; }
+        #copy-btn:hover { background: #007aff; }
+        #clear-btn { background: #ff453a; }
+        #clear-btn:hover { background: #ff3b30; }
+        #notification {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #32d74b;
+            min-height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Auto Pano Grabber</h3>
+    
+    <div class="toggle-container">
+        <span class="toggle-label">Scan Automatique</span>
+        <label class="switch">
+            <input type="checkbox" id="scan-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="stats">
+        Identifiants captures : <strong id="count">0</strong>
+    </div>
+
+    <textarea id="pano-list" readonly></textarea>
+    
+    <div class="btn-group">
+        <button id="copy-btn">Copier tout</button>
+        <button id="clear-btn">Vider</button>
+    </div>
+
+    <div id="notification"></div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
