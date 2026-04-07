@@ -161,6 +161,72 @@ header {
     background: #222;
 }
 
+#end-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    padding: 20px;
+    text-align: center;
+}
+
+.end-title {
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.end-stats {
+    font-size: 1.5rem;
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+.end-score {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.btn-replay-same, .btn-replay-diff {
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.btn-replay-same {
+    background: #28a745;
+}
+
+.btn-replay-same:hover, .btn-replay-same:focus {
+    background: #218838;
+}
+
+.btn-replay-diff {
+    background: #007bff;
+}
+
+.btn-replay-diff:hover, .btn-replay-diff:focus {
+    background: #0069d9;
+}
+
 #map-interface {
     position: absolute;
     bottom: 0;
@@ -314,5 +380,12 @@ footer {
 
     #btn-toggle-map {
         bottom: 390px;
+    }
+}
+
+@media (max-width: 767px) {
+    #end-screen {
+        justify-content: flex-start;
+        padding-top: 40px;
     }
 }
