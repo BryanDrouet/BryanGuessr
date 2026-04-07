@@ -251,12 +251,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    box-shadow: inset 0 0 50px var(--danger);
+    box-shadow: inset 0 0 80px rgba(255, 59, 48, 0.6), inset 0 0 20px rgba(255, 59, 48, 0.8);
+    border: 4px solid var(--danger);
     pointer-events: none;
     z-index: 50;
-    animation: pulseCritical 1s infinite alternate ease-in-out;
+    animation: pulseCritical 0.6s infinite alternate ease-in-out;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.3s ease;
 }
 
 .game-main.time-critical.active::after {
@@ -264,8 +265,14 @@ body {
 }
 
 @keyframes pulseCritical {
-    from { box-shadow: inset 0 0 15px var(--danger); }
-    to { box-shadow: inset 0 0 60px var(--danger); }
+    from { 
+        box-shadow: inset 0 0 40px rgba(255, 59, 48, 0.4), inset 0 0 10px rgba(255, 59, 48, 0.6);
+        border-color: rgba(255, 59, 48, 0.6);
+    }
+    to { 
+        box-shadow: inset 0 0 100px rgba(255, 59, 48, 0.8), inset 0 0 25px rgba(255, 59, 48, 1);
+        border-color: var(--danger);
+    }
 }
 
 .timer-critical {
@@ -307,6 +314,17 @@ header {
 .btn-back:hover {
     background: var(--btn-hover);
     transform: translateX(-5px);
+}
+
+.round-badge {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .theme-selector-container {
@@ -545,6 +563,24 @@ header {
     background: #e5e5e5;
 }
 
+.custom-svg-marker {
+    background: transparent;
+    border: none;
+}
+
+.leaflet-control-layers {
+    border-radius: 8px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-panel) !important;
+    color: var(--text-main) !important;
+}
+
+.leaflet-control-layers-list {
+    font-family: system-ui, sans-serif;
+    font-size: 0.9rem;
+}
+
 #btn-guess {
     width: 100%;
     padding: 15px;
@@ -558,12 +594,11 @@ header {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: background-color 0.3s ease;
 }
 
 #btn-guess:hover {
-    background: #28a745;
-    transform: translateY(-2px);
+    background-color: #218838;
 }
 
 #rgpd-banner {
