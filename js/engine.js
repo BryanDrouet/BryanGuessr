@@ -1,27 +1,18 @@
-/**
- * Engine pour GeoGuessr clone - Version Pannellum 360°
- */
-
 function initMapAndPanorama(park, gameState, currentLocation, notify) {
     const panoContainer = document.getElementById('panorama-container');
     const pano = currentLocation.pano;
     
-    // Vider le conteneur
     panoContainer.innerHTML = '';
     
-    // Détruire le viewer Pannellum existant
     if (window.pannellumViewer) {
         window.pannellumViewer.destroy();
     }
-    
-    // Initialiser Pannellum avec l'image panoramique
-    console.log(`Charger panorama: ${pano}`);
     
     window.pannellumViewer = pannellum.viewer('panorama-container', {
         type: 'equirectangular',
         panorama: pano,
         autoLoad: true,
-        showControls: false,
+        showControls: true,
         mouseZoom: true,
         doubleClickZoom: true,
         haov: 360,
@@ -31,19 +22,16 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
         maxHfov: 120,
         compass: false,
         showFullscreenCtrl: false,
-        showZoomCtrl: false,
+        showZoomCtrl: true,
         hotSpotDebug: isDebug,
         hotSpots: currentLocation.hotspots || [],
         onError: (error) => {
-            console.error('Erreur Pannellum:', error);
             notify('Erreur de chargement');
         },
         onLoad: () => {
-            console.log('✓ Panorama chargé');
         }
     });
     
-    // Gestion des hotspots (navigation vers autres points)
     if (currentLocation.hotspots && currentLocation.hotspots.length > 0) {
         currentLocation.hotspots.forEach((hotspot, idx) => {
             if (hotspot.clickHandlerFunc) {
@@ -56,7 +44,6 @@ function initMapAndPanorama(park, gameState, currentLocation, notify) {
         });
     }
     
-    // Créer la carte Leaflet pour l'interface de localisation
     createMapInterface(park, gameState, currentLocation, notify);
 }
 
@@ -64,7 +51,6 @@ function createMapInterface(park, gameState, currentLocation, notify) {
     const mapContainer = document.getElementById('map-container');
     if (!mapContainer) return;
     
-    // Détruire la carte existante si elle existe
     if (window.leafletMap) {
         window.leafletMap.remove();
         window.leafletMap = null;
@@ -72,7 +58,6 @@ function createMapInterface(park, gameState, currentLocation, notify) {
     
     mapContainer.innerHTML = '';
     
-    // Créer la carte
     const baseMaps = {
         "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap', crossOrigin: true, className: 'map-tile-layer' }),
         "CartoDB Clair": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CartoDB', crossOrigin: true, className: 'map-tile-layer' }),
@@ -112,7 +97,6 @@ function createMapInterface(park, gameState, currentLocation, notify) {
             .addTo(map);
     });
 
-    // Stocker les références globales pour la validation
     window.currentMapData = {
         map: map,
         currentMarker: null,
@@ -158,7 +142,6 @@ function handleValidation(park, gameState, currentLocation, notify) {
         return;
     }
     
-    // Récupérer tous les marqueurs de la carte
     let userMarker = null;
     map.eachLayer(layer => {
         if (layer instanceof L.Marker && !userMarker) {
@@ -166,7 +149,6 @@ function handleValidation(park, gameState, currentLocation, notify) {
         }
     });
     
-    // Vérifier si un marqueur a été placé
     if (!userMarker) {
         notify('Veuillez placer un marqueur sur la carte avant de valider.', 'error');
         return;
@@ -175,8 +157,7 @@ function handleValidation(park, gameState, currentLocation, notify) {
     const userPos = userMarker.getLatLng();
     const targetPos = {lat: currentLocation.lat, lng: currentLocation.lng};
     
-    // Calculer la distance (formule de Haversine)
-    const R = 6371e3; // Rayon terre en mètres
+    const R = 6371e3;
     const p1 = userPos.lat * Math.PI / 180;
     const p2 = targetPos.lat * Math.PI / 180;
     const dp = (targetPos.lat - userPos.lat) * Math.PI / 180;
@@ -186,7 +167,6 @@ function handleValidation(park, gameState, currentLocation, notify) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distance = R * c;
     
-    // Calculer les points
     let points = 0;
     if (distance < 20) {
         points = 5000;
@@ -194,30 +174,24 @@ function handleValidation(park, gameState, currentLocation, notify) {
         points = Math.max(0, Math.floor(5000 * Math.exp(-distance / 1000)));
     }
     
-    // Ajouter les points au score total
     gameState.totalScore += points;
     document.getElementById('current-score').textContent = gameState.totalScore.toLocaleString('fr-FR');
     
-    // Ajouter le marqueur de la position réelle
     const targetIcon = createSvgIcon('flag', '#34c759');
     L.marker([currentLocation.lat, currentLocation.lng], {icon: targetIcon})
         .bindTooltip('Lieu à trouver', {direction: 'top', className: 'custom-map-tooltip'})
         .addTo(map);
     
-    // Tracer une ligne entre les deux positions
     L.polyline([userPos, targetPos], {color: 'red', weight: 3}).addTo(map);
     
-    // Ajuster la vue pour montrer les deux marqueurs
     map.fitBounds([userPos, targetPos], {padding: [30, 30]});
     
-    // Désactiver les clics sur la carte (pas besoin de la cacher)
     map.off('click');
     const btnGuess = document.getElementById('btn-guess');
     btnGuess.disabled = true;
     btnGuess.style.opacity = '0.5';
     btnGuess.style.pointerEvents = 'none';
     
-    // Créer l'écran de fin de manche
     const isLastRound = gameState.currentRound >= gameState.options.totalRounds;
     
     const endScreen = document.createElement('div');
@@ -239,7 +213,6 @@ function handleValidation(park, gameState, currentLocation, notify) {
     actionButtonsWrapper.className = 'end-action-buttons';
     
     if (isLastRound) {
-        // Fin du jeu
         const btnReplay = document.createElement('button');
         btnReplay.className = 'btn-replay-same';
         btnReplay.innerHTML = '<i data-lucide="rotate-cw"></i> Rejouer';
@@ -256,7 +229,6 @@ function handleValidation(park, gameState, currentLocation, notify) {
         actionButtonsWrapper.appendChild(btnReplay);
         actionButtonsWrapper.appendChild(btnHome);
     } else {
-        // Manche suivante
         const btnNext = document.createElement('button');
         btnNext.className = 'btn-replay-diff';
         btnNext.innerHTML = '<i data-lucide="arrow-right"></i> Manche suivante';
@@ -279,7 +251,6 @@ function handleValidation(park, gameState, currentLocation, notify) {
     
     const main = document.querySelector('.game-main');
     
-    // Ajouter une classe au mapInterface pour le positionner correctement pendant l'écran de fin
     const mapInterface = document.getElementById('map-interface');
     if (mapInterface) {
         mapInterface.classList.add('during-end-screen');
@@ -290,10 +261,8 @@ function handleValidation(park, gameState, currentLocation, notify) {
 }
 
 function generateHotspots(gameState) {
-    // Hotspots pour navigation et marqueur de réponse
     const hotspots = [];
     
-    // Ajouter un marqueur au center pour indiquer le point de départ
     hotspots.push({
         pitch: 0,
         yaw: 0,
@@ -306,7 +275,6 @@ function generateHotspots(gameState) {
 }
 
 function addAnswerMarker(yaw, pitch) {
-    // Ajouter un marqueur temporaire où l'utilisateur a cliqué
     if (window.pannellumViewer) {
         window.pannellumViewer.addHotSpot({
             pitch: pitch,
@@ -324,20 +292,15 @@ function clearAnswerMarker() {
         try {
             window.pannellumViewer.removeHotSpot('answer-marker');
         } catch (e) {
-            // Hot spot n'existe pas, c'est ok
         }
     }
 }
 
 function captureUserAnswer(callback) {
-    // En 360°, l'utilisateur pointe là où il pense que c'est
-    // On récupère l'orientation actuelle du panorama
     if (window.pannellumViewer) {
         const pitch = window.pannellumViewer.getPitch();
         const yaw = window.pannellumViewer.getYaw();
         const hfov = window.pannellumViewer.getHfov();
-        
-        console.log(`Réponse: yaw=${yaw}, pitch=${pitch}, hfov=${hfov}`);
         
         callback({
             yaw,
@@ -348,8 +311,7 @@ function captureUserAnswer(callback) {
 }
 
 function calculateDistance(lat1, lng1, lat2, lng2) {
-    // Formule de Haversine pour distance géographique
-    const R = 6371; // Rayon Terre en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -360,9 +322,7 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
 }
 
 function calculateScore(distanceKm) {
-    // Système de points basé sur la distance
-    // Max 5000 points si distance < 1km
-    const maxDistance = 100; // km (au-delà c'est 0 points)
+    const maxDistance = 100;
     
     if (distanceKm <= 1) return 5000;
     if (distanceKm >= maxDistance) return 0;

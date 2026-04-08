@@ -237,7 +237,18 @@
     height: calc(100dvh - 120px);
 }
 
-/* Quand un écran de fin est affiché */
+#map-interface.minimized {
+    height: 44px;
+    width: 240px;
+}
+
+#map-interface.minimized #map-container,
+#map-interface.minimized #btn-guess {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
 #map-interface.during-end-screen {
     position: fixed;
     bottom: max(20px, env(safe-area-inset-bottom));
@@ -284,7 +295,8 @@
     gap: 8px;
 }
 
-#btn-toggle-map {
+#btn-toggle-map,
+#btn-minimize-map {
     background: transparent;
     border: none;
     color: var(--text-main);
@@ -298,7 +310,11 @@
     pointer-events: auto;
 }
 
-/* Styliser les boutons Leaflet (zoom controls) */
+#btn-toggle-map:hover,
+#btn-minimize-map:hover {
+    background-color: var(--btn-hover);
+}
+
 .leaflet-control-zoom {
     display: flex;
     flex-direction: column;

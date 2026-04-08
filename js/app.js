@@ -20,7 +20,6 @@ function renderHome() {
         const btn = document.createElement('button');
         btn.className = 'park-btn';
         
-        // Vérification si le parc est prêt (plus de 1 point réel)
         const isReady = park.id === 'puydufou' && park.locations.length > 0;
 
         if (!isReady) {
@@ -324,12 +323,19 @@ function renderGame(park, gameState) {
     const mapButtonsContainer = document.createElement('div');
     mapButtonsContainer.className = 'map-buttons-container';
 
+    const btnMinimizeMap = document.createElement('button');
+    btnMinimizeMap.id = 'btn-minimize-map';
+    btnMinimizeMap.type = 'button';
+    btnMinimizeMap.setAttribute('aria-label', 'Minimiser la carte');
+    btnMinimizeMap.innerHTML = '<i data-lucide="minus"></i>';
+
     const btnToggleMap = document.createElement('button');
     btnToggleMap.id = 'btn-toggle-map';
     btnToggleMap.type = 'button';
     btnToggleMap.setAttribute('aria-label', 'Agrandir la carte');
     btnToggleMap.innerHTML = '<i data-lucide="maximize"></i>';
 
+    mapButtonsContainer.appendChild(btnMinimizeMap);
     mapButtonsContainer.appendChild(btnToggleMap);
 
     mapHeader.appendChild(mapTitle);
@@ -347,11 +353,33 @@ function renderGame(park, gameState) {
         handleValidation(park, gameState, currentLocation, showNotification);
     });
 
+    btnMinimizeMap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mapInterface.classList.remove('expanded');
+        mapInterface.classList.toggle('minimized');
+        
+        btnToggleMap.setAttribute('aria-label', 'Agrandir la carte');
+        btnToggleMap.innerHTML = '<i data-lucide="maximize"></i>';
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            if (window.leafletMap && !mapInterface.classList.contains('minimized')) {
+                window.leafletMap.invalidateSize();
+            }
+        }, 300);
+    });
+
     mapHeader.addEventListener('click', (e) => {
-        // Toggle expand/collapse sur n'importe quel click dans le header
+        if (mapInterface.classList.contains('minimized')) {
+            mapInterface.classList.remove('minimized');
+            setTimeout(() => {
+                if (window.leafletMap) window.leafletMap.invalidateSize();
+            }, 300);
+            return;
+        }
+
         const isExpanded = mapInterface.classList.toggle('expanded');
         
-        // Changer l'icône du bouton
         if (isExpanded) {
             btnToggleMap.setAttribute('aria-label', 'Réduire la carte');
             btnToggleMap.innerHTML = '<i data-lucide="minimize-2"></i>';
@@ -362,7 +390,6 @@ function renderGame(park, gameState) {
         
         lucide.createIcons();
         
-        // Redessiner la carte après le changement de taille
         setTimeout(() => {
             if (window.leafletMap) {
                 window.leafletMap.invalidateSize();
