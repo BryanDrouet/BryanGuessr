@@ -1,0 +1,113 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: #1a1a2e;
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+}
+header {
+    padding: 2rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #e5b566;
+}
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem;
+}
+.wheel-container {
+    position: relative;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.pointer {
+    position: absolute;
+    top: -15px;
+    color: #e5b566;
+    z-index: 10;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+}
+canvas {
+    border-radius: 50%;
+    box-shadow: 0 0 25px rgba(229, 181, 102, 0.3);
+    max-width: 100%;
+    height: auto;
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+button {
+    background-color: #e5b566;
+    color: #1a1a2e;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+button:hover {
+    background-color: #f5c576;
+}
+button:active {
+    transform: scale(0.95);
+}
+button:disabled {
+    background-color: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+#resultDisplay {
+    margin-top: 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    min-height: 2em;
+    color: #42b5ff;
+}
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+footer {
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    border-top: 1px solid #2a2a4e;
+    font-size: 0.9rem;
+}
+footer nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+footer a {
+    color: #e5b566;
+    text-decoration: none;
+}
+footer a:hover {
+    text-decoration: underline;
+}
