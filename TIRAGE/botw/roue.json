@@ -1,0 +1,18 @@
+{
+  "title": "Bénédiction de la Déesse",
+  "hideTitle": false,
+  "hideLabels": true,
+  "autoSpin": false,
+  "options": [
+    {
+      "label": "Coeur",
+      "color": "#ff4444",
+      "image": "Coeur.png"
+    },
+    {
+      "label": "Endurance",
+      "color": "#44ff44",
+      "image": "Endurance.png"
+    }
+  ]
+}

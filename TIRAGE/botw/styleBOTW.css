@@ -1,0 +1,60 @@
+/* Styling spécifique à BOTW */
+:root {
+    --primary-color: #e5b566;
+    --primary-hover: #f5c576;
+    --background: #1a1a2e;
+    --text-color: #f0f0f0;
+    --border-color: #2a2a4e;
+    --result-color: #42b5ff;
+    --disabled-bg: #555;
+    --disabled-text: #888;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text-color);
+}
+
+header {
+    color: var(--primary-color);
+}
+
+.pointer {
+    color: var(--primary-color);
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+canvas {
+    box-shadow: 0 0 25px rgba(229, 181, 102, 0.3);
+}
+
+button {
+    background-color: var(--primary-color);
+    color: var(--background);
+    border: 2px solid #c4923a;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+button:active {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    background-color: var(--disabled-bg);
+    color: var(--disabled-text);
+    border-color: #444;
+    box-shadow: none;
+}
+
+#resultDisplay {
+    color: var(--result-color);
+}
+
+footer {
+    border-top: 1px solid var(--border-color);
+}

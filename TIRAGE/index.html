@@ -4,24 +4,23 @@
     <base href="/TIRAGE/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Tirage au sort dynamique pour choisir entre un réceptacle de cœur ou d'endurance dans Zelda.">
-    <title>Choix Hylia - Cœur ou Endurance</title>
+    <meta name="description" content="Roue de tirage au sort dynamique.">
+    <title>Roue de Tirage</title>
     <link rel="stylesheet" href="/TIRAGE/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <header>
-        <h1><i data-lucide="swords" aria-hidden="true"></i> Bénédiction de la Déesse</h1>
+        <h1 id="wheelTitle"><i id="wheelIcon" data-lucide="swords" aria-hidden="true"></i> <span id="titleText">Chargement...</span></h1>
     </header>
     <main>
         <div class="wheel-container">
             <div class="pointer"><i data-lucide="arrow-down" aria-hidden="true"></i></div>
-            <canvas id="wheelCanvas" width="300" height="300" aria-label="Roue de tirage au sort" role="img"></canvas>
+            <canvas id="wheelCanvas" aria-label="Roue de tirage au sort" role="img"></canvas>
         </div>
-        <button id="spinButton" name="spinAction" aria-label="Lancer la roue">Lancer la roue</button>
         <p id="resultAnnouncement" aria-live="assertive" class="sr-only"></p>
-        <div id="resultDisplay" aria-hidden="true"></div>
     </main>
     <script src="/TIRAGE/script.js" defer></script>
 </body>
 </html>
+
