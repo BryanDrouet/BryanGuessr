@@ -1,8 +1,8 @@
 {
   "title": "Bénédiction de la Déesse",
-  "hideTitle": false,
+  "hideTitle": true,
   "hideLabels": true,
-  "autoSpin": false,
+  "autoSpin": true,
   "options": [
     {
       "label": "Coeur",

@@ -101,6 +101,10 @@ async function loadWheelData() {
         window.addEventListener('resize', resizeCanvas);
         
         drawWheel();
+
+        requestAnimationFrame(() => {
+            document.body.classList.add('ready');
+        });
         
         // Auto-spin si activé
         if (wheelData.autoSpin) {
@@ -137,7 +141,8 @@ function drawWheel() {
 
     const centerX = wheelSize / 2;
     const centerY = wheelSize / 2;
-    const radius = wheelSize / 2;
+    const borderInset = Math.max(3, Math.round(wheelSize * 0.0125));
+    const radius = wheelSize / 2 - borderInset;
 
     const sliceAngle = (2 * Math.PI) / options.length;
 
@@ -158,9 +163,6 @@ function drawWheel() {
         ctx.closePath();
         ctx.fillStyle = colors[i];
         ctx.fill();
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.stroke();
 
         const textAngle = startAngle + sliceAngle / 2;
 
@@ -196,6 +198,33 @@ function drawWheel() {
             ctx.restore();
         }
     }
+
+    // Séparateurs fins entre les options pour éviter un rendu visuel irrégulier
+    ctx.save();
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = Math.max(1, Math.round(wheelSize * 0.004));
+    ctx.lineCap = 'round';
+    for (let i = 0; i < options.length; i++) {
+        const angle = i * sliceAngle - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = Math.max(2, Math.round(wheelSize * 0.008));
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
 }
 
 function spinWheel() {
